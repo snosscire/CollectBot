@@ -1,4 +1,4 @@
-uses 'WedoEngine/Engine';
+uses 'WedoEngine/WedoEngine/Engine';
 uses 'Game/Input';
 uses 'Game/Controller';
 uses 'Game/Map';

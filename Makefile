@@ -1,13 +1,8 @@
 CC=gcc -g
 FLAGS=-Wall -I/usr/local/include -I/usr/local/include/SDL2
 LIBS=-L/usr/local/lib -lferite -lSDL2 -lSDL2_image
-SOURCES=Source/main.c \
-	Source/WedoArray.c \
-	Source/WedoEngine.c \
-	Source/WedoEngineFerite.c \
-	Source/WedoImage.c \
-	Source/WedoTexture.c \
-	Source/ini.c
+SOURCES=main.c \
+	WedoEngine/WedoEngine.c
 OBJECTS=$(SOURCES:.c=.o)
 PROGRAM=game.osx
 

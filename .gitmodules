@@ -1,0 +1,3 @@
+[submodule "WedoEngine"]
+	path = WedoEngine
+	url = git@github-snosscire:snosscire/WedoEngine.git

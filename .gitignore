@@ -3,3 +3,4 @@ Resources/*
 WedoEngine.custom/*
 Test.fe
 game.*
+*.o
