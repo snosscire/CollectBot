@@ -1,0 +1,65 @@
+uses 'WedoEngine/Engine';
+uses 'Game/Input';
+uses 'Game/Controller';
+uses 'Game/Map';
+uses 'Game/Player';
+
+global {
+	boolean keepRunning;
+}
+
+class Vector {
+	number x;
+	number y;
+
+	function constructor( number x, number y ) {
+		.x = x;
+		.y = y;
+	}
+}
+
+class Rectangle {
+	number x;
+	number y;
+	number width;
+	number height;
+}
+
+class Time {
+	static number current;
+	static number last;
+	static number delta;
+}
+
+object map;
+object player;
+object camera;
+
+keepRunning = true;
+
+Engine.createWindow("Secret Project", 640, 480);
+
+map = Map.load();
+player = Player.load();
+camera = new PlayerCamera();
+
+Time.last = Engine.currentTime();
+
+while( keepRunning ) {
+	Time.current = Engine.currentTime();
+	Time.delta = Time.current - Time.last;
+	Time.last = Time.current;
+
+	InputManager.update();
+
+	player.update(map);
+	camera.update(map, player);
+
+	Engine.clearScreen();
+
+	map.renderBackground(camera);
+	player.render(map, camera);	
+	map.renderForeground(camera);
+
+	Engine.updateScreen();	
+}

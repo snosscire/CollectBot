@@ -1,0 +1,118 @@
+class MapLayer {
+	number x;
+	number y;
+	number level;
+	number speed;
+	object texture;
+
+	function render( object camera ) {
+		number screenX = (.x - camera.left) * .speed;
+		number screenY = .y - camera.top;
+		Engine.renderTexture(.texture, screenX, screenY);
+	}
+}
+
+class MapBox {
+	number x;
+	number y;
+	number width;
+	number height;
+}
+
+class Map {
+	array layers;
+	array boxes;
+	number width;
+	number height;
+
+	static function load() {
+		object map = new Map();
+		object layer;
+		object box;
+		
+		layer = new MapLayer();
+		layer.x = 0;
+		layer.y = 0;
+		layer.level = -5;
+		layer.speed = 0.2;
+		layer.texture = Engine.loadTexture("Resources/Maps/sky_BG.png");
+		map.layers[] = layer;
+
+		layer = new MapLayer();
+		layer.x = 0;
+		layer.y = 480 - 58 - 480;
+		layer.level = -4;
+		layer.speed = 0.4;
+		layer.texture = Engine.loadTexture("Resources/Maps/mountains_back.png");
+		map.layers[] = layer;
+
+		layer = new MapLayer();
+		layer.x = 0;
+		layer.y = 480 - 58 - 40;
+		layer.level = -3;
+		layer.speed = 0.6;
+		layer.texture = Engine.loadTexture("Resources/Maps/hills_mid.png");
+		map.layers[] = layer;
+
+		layer = new MapLayer();
+		layer.x = 0;
+		layer.y = 480 - 56;
+		layer.level = -1;
+		layer.speed = 1.0;
+		layer.texture = Engine.loadTexture("Resources/Maps/ground_bottom.png");
+		map.layers[] = layer;
+
+		layer = new MapLayer();
+		layer.x = 0;
+		layer.y = 0;
+		layer.level = 1;
+		layer.speed = 1.0;
+		layer.texture = Engine.loadTexture("Resources/Maps/clouds_top_small.png");
+		map.layers[] = layer;
+
+		box = new MapBox();
+		box.x = 0;
+		box.y = 438;
+		box.width = 4050;
+		box.height = 42;
+		map.boxes[] = box;
+
+		map.width = 4050;
+		map.height = 480;
+
+		return map;
+	}
+
+	function renderBackground( object camera ) {
+		.layers.each() using ( layer ) {
+			if( layer.level <= 0 ) {
+				layer.render(camera);
+			}
+		};
+	}
+
+	function renderForeground( object camera ) {
+		.layers.each() using ( layer ) {
+			if( layer.level > 0 ) {
+				layer.render(camera);
+			}
+		};
+	}
+
+	function hasCollision( object o ) {
+		boolean has = false;
+		.boxes.each() using ( box ) {
+			has = Engine.hasIntersection(box.x,
+			                             box.y,
+			                             box.width,
+			                             box.height,
+			                             o.x - (o.width / 2),
+			                             o.y - (o.height / 2),
+			                             o.width,
+			                             o.height);
+			if( has )
+				return false; // break;
+		};
+		return has;
+	}
+}

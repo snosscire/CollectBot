@@ -1,0 +1,49 @@
+class InputManager {
+	static array devices;
+	static function register( object device ) {
+		.devices[] = device;
+	}
+	static function update() {
+		object event = Engine.nextEvent();
+		while( event ) {
+			if( event.type == Engine.EVENT_QUIT ) {
+				keepRunning = false;
+				break;
+			}
+			.devices.each() using ( device ) {
+				device.update(event);
+			};
+			event = Engine.nextEvent();
+		}
+	}
+}
+
+abstract class InputDevice {
+	boolean moveLeft;
+	boolean moveRight;
+	boolean moveUp;
+	boolean moveDown;
+	boolean jump;
+
+	function constructor {
+		InputManager.register(self);
+	}
+}
+
+class KeyboardInputDevice extends InputDevice {
+	function update( object event ) {
+		if( event.type == Engine.EVENT_KEYDOWN ) {
+			if( event.key == Engine.KEY_LEFT )  .moveLeft = true;
+			if( event.key == Engine.KEY_RIGHT ) .moveRight = true;
+			if( event.key == Engine.KEY_UP )    .moveUp = true;
+			if( event.key == Engine.KEY_DOWN )  .moveDown = true;
+			if( event.key == Engine.KEY_SPACE ) .jump = true;
+		} else if( event.type == Engine.EVENT_KEYUP ) {
+			if( event.key == Engine.KEY_LEFT )  .moveLeft = false;
+			if( event.key == Engine.KEY_RIGHT ) .moveRight = false;
+			if( event.key == Engine.KEY_UP )    .moveUp = false;
+			if( event.key == Engine.KEY_DOWN )  .moveDown = false;
+			if( event.key == Engine.KEY_SPACE ) .jump = false;
+		}
+	}
+}

@@ -1,0 +1,24 @@
+abstract class Controller {
+	object input;
+	function constructor( object input ) {
+		.input = input;
+	}
+	function update( object player ) {
+		raise new Error('[Controller] Function update has not been implemented.');
+	}
+}
+
+class MoveFreeController extends Controller {
+	function update( object player ) {
+		player.moveLeft = .input.moveLeft;
+		player.moveRight = .input.moveRight;
+		player.jump = .input.jump;
+	}
+}
+
+class PlayerController extends Controller {
+	function update( object player ) {
+		player.moveRight = true;
+		player.jump = .input.jump;
+	}
+}

@@ -1,0 +1,136 @@
+class PlayerCamera {
+	number left;
+	number right;
+	number top;
+	number bottom;
+
+	function update( object map, object player ) {
+		number screenWidth = 640;
+		number screenHeight = 480;
+		
+		.left = player.x - (screenWidth / 2) + (screenWidth / 4);
+		.top = player.y - (screenHeight / 2);
+		
+		if( .left < 0 ) {
+			.left = 0;
+		} else if( .left > (map.width - screenWidth) ) {
+			.left = map.width - screenWidth;
+		}
+
+		if( .top < 0 ) {
+			.top = 0;
+		} else if( .top > (map.height - screenHeight) ) {
+			.top = map.height - screenHeight;
+		}
+
+		.right = .left + screenWidth;
+		.bottom = .top + screenHeight;
+	}
+}
+
+class Player {
+	number gravity;
+	number speed;
+	number x;
+	number y;
+	number width;
+	number height;
+	object velocity;
+	object texture;
+	object controller;
+	boolean moveLeft;
+	boolean moveRight;
+	boolean moveUp;
+	boolean moveDown;
+	boolean jump;
+	boolean onGround;
+
+	static function load() {
+		object player = new Player();
+		player.controller = new PlayerController(new KeyboardInputDevice());
+		player.texture = Engine.loadTexture("Resources/android.png");
+		player.x = 100;
+		player.y = 350;
+		player.width = player.texture.width;
+		player.height = player.texture.height;
+		player.gravity = 0.5;
+		player.speed = 3.5;
+		return player;
+	}
+
+	function constructor {
+		.velocity = new Vector();
+	}
+
+	function hasCollision( object map, object position ) {
+		object rect = new Rectangle();
+		rect.x = position.x;
+		rect.y = position.y;
+		rect.width = .width;
+		rect.height = .height;
+		return map.hasCollision(rect);
+	}
+
+	function update( object map ) {
+		object pos = new Vector(.x, .y);
+
+		.controller.update(self);
+
+		.velocity.x = 0.0;
+
+		if( .moveLeft )  .velocity.x = -.speed;
+		if( .moveRight ) .velocity.x = .speed;
+
+		if( .onGround and .jump ) {
+			.onGround = false;
+			.velocity.y = -10.0;
+		}
+
+		.velocity.y += .gravity;
+
+		pos.x += (Time.delta / 10.0) * .velocity.x;
+		pos.y += (Time.delta / 10.0) * .velocity.y;
+
+		if( .hasCollision(map, pos) ) {
+			boolean has = false;
+			has = .hasCollision(map, new Vector(pos.x, .y)); // x
+			if( not has ) {
+				// We are here because collision on x has not occured.
+				// That means we can assume we have collision on y.
+				.x = pos.x;
+				.velocity.y = 0.0;
+				.onGround = true;
+			} else {
+				has = .hasCollision(map, new Vector(.x, pos.y)); // y
+				if( not has ) {
+					// We are here because collision on y has not occured.
+					.y = pos.y;
+				}
+			}
+		} else {
+			.x = pos.x;
+			.y = pos.y;
+		}
+	}
+
+	function render( object map, object camera ) {
+		number x;
+		number y;
+
+		if( camera.left == 0 or camera.right == map.width ) {
+			x = .x - camera.left;
+		} else {
+			x = (640 / 2) - (640 / 4);
+		}
+		if( camera.top == 0 or camera.bottom == map.height ) {
+			y = .y - camera.top;
+		} else {
+			y = 480 / 2;
+		}
+
+		x -= .width / 2;
+		y -= .height / 2;
+
+		Engine.renderTexture(.texture, x, y);
+	}
+}
