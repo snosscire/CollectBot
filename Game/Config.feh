@@ -36,4 +36,5 @@ Config.setValue('ScreenHeight', 480);
 Config.setValue('PlayerSpawnX', 100);
 Config.setValue('PlayerSpawnY', 100);
 Config.setValue('PlayerGravity', 0.5);
-Config.setValue('PlayerMoveSpeed', 3.5);
+Config.setValue('PlayerMoveVelocity', 3.5);
+Config.setValue('PlayerJumpVelocity', -10.0);

@@ -51,7 +51,7 @@ class Player {
 		player.width = player.texture.width;
 		player.height = player.texture.height;
 		player.gravity = Config.PlayerGravity; // 0.5
-		player.speed = Config.PlayerMoveSpeed; // 3.5
+		player.speed = Config.PlayerMoveVelocity; // 3.5
 		return player;
 	}
 
@@ -80,7 +80,7 @@ class Player {
 
 		if( .onGround and .jump ) {
 			.onGround = false;
-			.velocity.y = -10.0;
+			.velocity.y = Config.PlayerJumpVelocity; // -10.0
 		}
 
 		.velocity.y += .gravity;
