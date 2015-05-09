@@ -5,26 +5,23 @@ class PlayerCamera {
 	number bottom;
 
 	function update( object map, object player ) {
-		number screenWidth = 640;
-		number screenHeight = 480;
-		
-		.left = player.x - (screenWidth / 2) + (screenWidth / 4);
-		.top = player.y - (screenHeight / 2);
+		.left = player.x - (Config.ScreenWidth / 2) + (Config.ScreenWidth / 4);
+		.top = player.y - (Config.ScreenHeight / 2);
 		
 		if( .left < 0 ) {
 			.left = 0;
-		} else if( .left > (map.width - screenWidth) ) {
-			.left = map.width - screenWidth;
+		} else if( .left > (map.width - Config.ScreenWidth) ) {
+			.left = map.width - Config.ScreenWidth;
 		}
 
 		if( .top < 0 ) {
 			.top = 0;
-		} else if( .top > (map.height - screenHeight) ) {
-			.top = map.height - screenHeight;
+		} else if( .top > (map.height - Config.ScreenHeight) ) {
+			.top = map.height - Config.ScreenHeight;
 		}
 
-		.right = .left + screenWidth;
-		.bottom = .top + screenHeight;
+		.right = .left + Config.ScreenWidth;
+		.bottom = .top + Config.ScreenHeight;
 	}
 }
 
@@ -48,13 +45,13 @@ class Player {
 	static function load() {
 		object player = new Player();
 		player.controller = new PlayerController(new KeyboardInputDevice());
-		player.texture = Engine.loadTexture("Resources/android.png");
-		player.x = 100;
-		player.y = 350;
+		player.texture = Engine.loadTexture('Resources/' + Config.PlayerTexture);
+		player.x = Config.PlayerSpawnX;
+		player.y = Config.PlayerSpawnY;
 		player.width = player.texture.width;
 		player.height = player.texture.height;
-		player.gravity = 0.5;
-		player.speed = 3.5;
+		player.gravity = Config.PlayerGravity; // 0.5
+		player.speed = Config.PlayerMoveSpeed; // 3.5
 		return player;
 	}
 
@@ -120,12 +117,12 @@ class Player {
 		if( camera.left == 0 or camera.right == map.width ) {
 			x = .x - camera.left;
 		} else {
-			x = (640 / 2) - (640 / 4);
+			x = (Config.ScreenWidth / 2) - (Config.ScreenWidth / 4);
 		}
 		if( camera.top == 0 or camera.bottom == map.height ) {
 			y = .y - camera.top;
 		} else {
-			y = 480 / 2;
+			y = Config.ScreenHeight / 2;
 		}
 
 		x -= .width / 2;

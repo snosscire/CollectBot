@@ -1,4 +1,5 @@
 uses 'WedoEngine/WedoEngine/Engine';
+uses 'Game/Config';
 uses 'Game/Input';
 uses 'Game/Controller';
 uses 'Game/Map';
@@ -35,11 +36,13 @@ object map;
 object player;
 object camera;
 
+Config.load();
+
 keepRunning = true;
 
-Engine.createWindow("Secret Project", 640, 480);
+Engine.createWindow(Config.WindowTitle, Config.ScreenWidth, Config.ScreenHeight);
 
-map = Map.load();
+map = Map.load(Config.StartMap);
 player = Player.load();
 camera = new PlayerCamera();
 

@@ -1,0 +1,39 @@
+class Config {
+	static array values;
+	static function load() {
+		array ini = Engine.parseINI('Game.ini');
+		ini.each() using ( entry ) {
+			if( .values.keyExists(entry.name) ) {
+				if      ( .values[entry.name] isa boolean ) .values[entry.name] = (entry.value.toLower() == 'true' or 
+				                                                                   entry.value.toLower() == 'yes' ? true : false);
+				else if ( .values[entry.name] isa number )  .values[entry.name] = entry.value.toNumber();
+				else                                        .values[entry.name] = entry.value;
+			} else {
+				.values[entry.name] = entry.value;
+			}
+		};
+	}
+	static function setValue( string name, string value ) {
+		.values[name] = value;
+	}
+	static function setValue( string name, number value ) {
+		.values[name] = value;
+	}
+	static function setValue( string name, boolean value ) {
+		.values[name] = value;
+	}
+	static function attribute_missing( string name ) {
+		if( .values.keyExists(name) )
+			return .values[name];
+		return "";
+	}
+}
+
+Config.setValue('WindowTitle', 'Secret Project');
+Config.setValue('ScreenWidth', 640);
+Config.setValue('ScreenHeight', 480);
+
+Config.setValue('PlayerSpawnX', 100);
+Config.setValue('PlayerSpawnY', 100);
+Config.setValue('PlayerGravity', 0.5);
+Config.setValue('PlayerMoveSpeed', 3.5);

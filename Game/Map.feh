@@ -19,11 +19,99 @@ class MapBox {
 	number height;
 }
 
+namespace modifies Array {
+	function bySectionAndName( array list, string section, string name ) {
+		object match;
+		list.each() using ( entry ) {
+			if( entry.section == section and entry.name == name ) {
+				match = entry;
+				return false; // break
+			}
+		};
+		return match;
+	}
+	function byName( array list, string name ) {
+		object match;
+		list.each() using ( entry ) {
+			if( entry.name == name ) {
+				match = entry;
+				return false; // break
+			}
+		};
+		return match;
+	}
+	function listBySection( array list, string section ) {
+		array matches;
+		list.each() using( entry ) {
+			if( entry.section == section )
+				matches[] = entry;
+		};
+		return matches;
+	}
+}
+
 class Map {
 	array layers;
 	array boxes;
 	number width;
 	number height;
+
+	static function load( string name ) {
+		string basePath = "Resources/Maps/${name}/";
+		array ini = Engine.parseINI(basePath + 'Map.ini');
+
+		if( ini ) {
+			object width = ini.bySectionAndName('Map', 'Width');
+			object height = ini.bySectionAndName('Map', 'Height');
+			object layers = ini.bySectionAndName('Map', 'Layers');
+
+			if( width and
+				height and
+				layers )
+			{
+				object map = new Map();
+				object box;
+				map.width = width.value.toNumber();
+				map.height = height.value.toNumber();
+
+				for( number i = 1; i <= layers.value.toNumber(); i++ ) {
+					array list = ini.listBySection("Layer${i}");
+					if( list ) {
+						object x = list.byName('ScreenX');
+						object y = list.byName('ScreenY');
+						object level = list.byName('Level');
+						object speed = list.byName('Speed');
+						object texture = list.byName('Texture');
+						if( x and
+							y and
+							level and
+							speed and
+							texture )
+						{
+							object layer = new MapLayer();
+							layer.x = (x.value.toNumber() >= 0 ? x.value.toNumber() : map.width + x.value.toNumber());
+							layer.y = (y.value.toNumber() >= 0 ? y.value.toNumber() : map.height + y.value.toNumber());
+							layer.level = level.value.toNumber();
+							layer.speed = speed.value.toNumber();
+							layer.texture = Engine.loadTexture(basePath + texture.value);
+							map.layers[] = layer;
+						}
+					}
+				}
+
+				box = new MapBox();
+				box.x = 0;
+				box.y = map.height - 30;
+				box.width = 4050;
+				box.height = 42;
+				map.boxes[] = box;
+
+				return map;
+			}
+		}
+
+		return null;
+	}
 
 	static function load() {
 		object map = new Map();
@@ -40,7 +128,7 @@ class Map {
 
 		layer = new MapLayer();
 		layer.x = 0;
-		layer.y = 480 - 58 - 480;
+		layer.y = Config.ScreenHeight - 58 - 480;
 		layer.level = -4;
 		layer.speed = 0.4;
 		layer.texture = Engine.loadTexture("Resources/Maps/mountains_back.png");
@@ -48,7 +136,7 @@ class Map {
 
 		layer = new MapLayer();
 		layer.x = 0;
-		layer.y = 480 - 58 - 40;
+		layer.y = Config.ScreenHeight - 58 - 40;
 		layer.level = -3;
 		layer.speed = 0.6;
 		layer.texture = Engine.loadTexture("Resources/Maps/hills_mid.png");
@@ -56,7 +144,7 @@ class Map {
 
 		layer = new MapLayer();
 		layer.x = 0;
-		layer.y = 480 - 56;
+		layer.y = Config.ScreenHeight - 56;
 		layer.level = -1;
 		layer.speed = 1.0;
 		layer.texture = Engine.loadTexture("Resources/Maps/ground_bottom.png");
@@ -72,13 +160,13 @@ class Map {
 
 		box = new MapBox();
 		box.x = 0;
-		box.y = 438;
+		box.y = Config.ScreenHeight - 42;
 		box.width = 4050;
 		box.height = 42;
 		map.boxes[] = box;
 
 		map.width = 4050;
-		map.height = 480;
+		map.height = Config.ScreenHeight;
 
 		return map;
 	}
