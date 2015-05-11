@@ -1,25 +1,25 @@
-class MapLayer {
-	number x;
-	number y;
-	number level;
-	number speed;
-	object texture;
-
-	function render( object camera ) {
-		number screenX = (.x - camera.left) * .speed;
-		number screenY = .y - camera.top;
-		Engine.renderTexture(.texture, screenX, screenY);
+namespace modifies String {
+	function toBoolean( string value ) {
+		if( value.toLower() == 'yes' or
+			value.toLower() == 'true' or
+			value == '1' )
+		{
+			return true;
+		}
+		return false;
 	}
 }
 
-class MapBox {
-	number x;
-	number y;
-	number width;
-	number height;
-}
-
 namespace modifies Array {
+	function sectionNames( array list ) {
+		array sections;
+		array have;
+		list.each() using ( o ) {
+			if( not have.keyExists(o.section) )
+				sections[] = o.section;
+		};
+		return sections;
+	}
 	function bySectionAndName( array list, string section, string name ) {
 		object match;
 		list.each() using ( entry ) {
@@ -29,6 +29,15 @@ namespace modifies Array {
 			}
 		};
 		return match;
+	}
+	function valueBySectionAndName( array list, string section, string name, void defaultValue ) {
+		object match = list.bySectionAndName(section, name);
+		if( match ) {
+			if( defaultValue isa boolean ) return match.value.toBoolean();
+			if( defaultValue isa number )  return match.value.toNumber();
+			return match.value;
+		}
+		return defaultValue;
 	}
 	function byName( array list, string name ) {
 		object match;
@@ -40,6 +49,15 @@ namespace modifies Array {
 		};
 		return match;
 	}
+	function valueByName( array list, string name, void defaultValue ) {
+		object match = list.byName(name);
+		if( match ) {
+			if( defaultValue isa boolean ) return match.value.toBoolean();
+			if( defaultValue isa number )  return match.value.toNumber();
+			return match.value;
+		}
+		return defaultValue;
+	}
 	function listBySection( array list, string section ) {
 		array matches;
 		list.each() using( entry ) {
@@ -50,125 +68,115 @@ namespace modifies Array {
 	}
 }
 
+class MapLayer {
+	number x;
+	number y;
+	number level;
+	number speed;
+	object texture;
+
+	function render( object camera ) {
+		number screenX;
+		number screenY = .y - camera.top;
+		number extra = 0;
+		do {
+			screenX = ((.x - camera.left) * .speed) + extra;
+			if( screenX + .texture.width >= 0 )
+				Engine.renderTexture(.texture, screenX, screenY);
+			extra += .texture.width;
+		} while( screenX + .texture.width < Config.ScreenWidth );
+	}
+}
+
+class MapTile {
+	number x;
+	number y;
+	object texture;
+
+	function render( object camera ) {
+		number screenX = .x - camera.left;
+		number screenY = .y - camera.top;
+		Engine.renderTexture(.texture, screenX, screenY);
+	}
+}
+
 class Map {
 	array layers;
-	array boxes;
+	array tiles;
 	number width;
 	number height;
+	number tileWidth;
+	number tileHeight;
 
 	static function load( string name ) {
 		string basePath = "Resources/Maps/${name}/";
-		array ini = Engine.parseINI(basePath + 'Map.ini');
-
-		if( ini ) {
-			object width = ini.bySectionAndName('Map', 'Width');
-			object height = ini.bySectionAndName('Map', 'Height');
-			object layers = ini.bySectionAndName('Map', 'Layers');
-
-			if( width and
-				height and
-				layers )
-			{
-				object map = new Map();
-				object box;
-				map.width = width.value.toNumber();
-				map.height = height.value.toNumber();
-
-				for( number i = 1; i <= layers.value.toNumber(); i++ ) {
-					array list = ini.listBySection("Layer${i}");
-					if( list ) {
-						object x = list.byName('ScreenX');
-						object y = list.byName('ScreenY');
-						object level = list.byName('Level');
-						object speed = list.byName('Speed');
-						object texture = list.byName('Texture');
-						if( x and
-							y and
-							level and
-							speed and
-							texture )
-						{
-							object layer = new MapLayer();
-							layer.x = (x.value.toNumber() >= 0 ? x.value.toNumber() : map.width + x.value.toNumber());
-							layer.y = (y.value.toNumber() >= 0 ? y.value.toNumber() : map.height + y.value.toNumber());
-							layer.level = level.value.toNumber();
-							layer.speed = speed.value.toNumber();
-							layer.texture = Engine.loadTexture(basePath + texture.value);
-							map.layers[] = layer;
-						}
-					}
-				}
-
-				box = new MapBox();
-				box.x = 0;
-				box.y = map.height - 30;
-				box.width = 4050;
-				box.height = 42;
-				map.boxes[] = box;
-
-				return map;
-			}
-		}
-
-		return null;
-	}
-
-	static function load() {
 		object map = new Map();
-		object layer;
-		object box;
-		
-		layer = new MapLayer();
-		layer.x = 0;
-		layer.y = 0;
-		layer.level = -5;
-		layer.speed = 0.2;
-		layer.texture = Engine.loadTexture("Resources/Maps/sky_BG.png");
-		map.layers[] = layer;
+		array config = Engine.parseINI(basePath + 'Map.ini');
 
-		layer = new MapLayer();
-		layer.x = 0;
-		layer.y = Config.ScreenHeight - 58 - 480;
-		layer.level = -4;
-		layer.speed = 0.4;
-		layer.texture = Engine.loadTexture("Resources/Maps/mountains_back.png");
-		map.layers[] = layer;
+		map.width = config.valueByName('MapWidth', 1920);
+		map.height = config.valueByName('MapHeight', 1080);
+		map.tileWidth = config.valueByName('TileWidth', 10);
+		map.tileHeight = config.valueByName('TileHeight', 10);
 
-		layer = new MapLayer();
-		layer.x = 0;
-		layer.y = Config.ScreenHeight - 58 - 40;
-		layer.level = -3;
-		layer.speed = 0.6;
-		layer.texture = Engine.loadTexture("Resources/Maps/hills_mid.png");
-		map.layers[] = layer;
-
-		layer = new MapLayer();
-		layer.x = 0;
-		layer.y = Config.ScreenHeight - 56;
-		layer.level = -1;
-		layer.speed = 1.0;
-		layer.texture = Engine.loadTexture("Resources/Maps/ground_bottom.png");
-		map.layers[] = layer;
-
-		layer = new MapLayer();
-		layer.x = 0;
-		layer.y = 0;
-		layer.level = 1;
-		layer.speed = 1.0;
-		layer.texture = Engine.loadTexture("Resources/Maps/clouds_top_small.png");
-		map.layers[] = layer;
-
-		box = new MapBox();
-		box.x = 0;
-		box.y = Config.ScreenHeight - 42;
-		box.width = 4050;
-		box.height = 42;
-		map.boxes[] = box;
-
-		map.width = 4050;
-		map.height = Config.ScreenHeight;
+		map.loadLayers(basePath);
+		map.loadTiles(basePath);
 
 		return map;
+	}
+
+	function loadLayers( string basePath ) {
+		array config = Engine.parseINI(basePath + 'Layers.ini');
+		array sections = config.sectionNames();
+
+		sections.each() using ( section ) {
+			array list = config.listBySection(section);
+			object texture = Engine.loadTexture(basePath + 'Layers/' + list.valueByName('Texture', ''));
+
+			if( texture ) {
+				number x = list.valueByName('X', 0);
+				number y = list.valueByName('Y', 0);
+				object layer = new MapLayer();
+				layer.x = (x >= 0 ? x : .width + x);
+				layer.y = (y >= 0 ? y : .height + y);
+				layer.level = list.valueByName('Level', 0);
+				layer.speed = list.valueByName('Speed', 0);
+				layer.texture = texture;
+				.layers[] = layer;
+			}
+		};
+	}
+
+	function loadTiles( string basePath ) {
+		object image = Engine.loadImage(basePath + 'Map.png');
+		if( image ) {
+			array config = Engine.parseINI(basePath + 'Tiles.ini');
+			array sections = config.sectionNames();
+			array colors;
+
+			sections.each() using ( section ) {
+				array list = config.listBySection(section);
+				number color = image.getColor(list.valueByName('Red', 0),
+					                          list.valueByName('Green', 0),
+					                          list.valueByName('Blue', 0));
+				object texture = Engine.loadTexture(basePath + 'Tiles/' + list.valueByName('Texture', ''));
+				if( texture ) {
+					colors["$color"] = texture;
+				}
+			};
+
+			for( number y = 0; y < image.height; y++ ) {
+				for( number x = 0; x < image.width; x++ ) {
+					number color = image.getPixel(x, y);
+					if( colors.keyExists("$color") ) {
+						object tile = new MapTile();
+						tile.x = x * .tileWidth;
+						tile.y = y * .tileHeight;
+						tile.texture = colors["$color"];
+						.tiles[] = tile;
+					}
+				}
+			}
+		}
 	}
 
 	function renderBackground( object camera ) {
@@ -182,18 +190,21 @@ class Map {
 	function renderForeground( object camera ) {
 		.layers.each() using ( layer ) {
 			if( layer.level > 0 ) {
-				layer.render(camera);
+				layer.render(self, camera);
 			}
+		};
+		.tiles.each() using ( tile ) {
+			tile.render(camera);
 		};
 	}
 
 	function hasCollision( object o ) {
 		boolean has = false;
-		.boxes.each() using ( box ) {
-			has = Engine.hasIntersection(box.x,
-			                             box.y,
-			                             box.width,
-			                             box.height,
+		.tiles.each() using ( tile ) {
+			has = Engine.hasIntersection(tile.x,
+			                             tile.y,
+			                             .tileWidth,
+			                             .tileHeight,
 			                             o.x - (o.width / 2),
 			                             o.y - (o.height / 2),
 			                             o.width,
