@@ -183,7 +183,7 @@ class Player {
 		if( camera.top == 0 or camera.bottom == map.height ) {
 			y = .y - camera.top;
 		} else {
-			y = Config.ScreenHeight / 2;
+			y = camera.screenHeight / 2;
 		}
 
 		x -= .width / 2;

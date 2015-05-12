@@ -35,6 +35,7 @@ Engine.createWindow(Config.WindowTitle, Config.ScreenWidth, Config.ScreenHeight)
 
 InputManager.register(application);
 Application.run = true;
+GameClock.start(Config.GameTime);
 game.start();
 
 Time.last = Engine.currentTime();
@@ -44,6 +45,7 @@ while( Application.run ) {
 	Time.delta = Time.current - Time.last;
 	Time.last = Time.current;
 
+	GameClock.update();
 	InputManager.update();
 	game.update();
 

@@ -15,12 +15,38 @@ class Rectangle {
 	number height;
 }
 
+class GameClock {
+	static boolean running;
+	static number milliseconds;
+	static array observers;
+
+	static function registerObserver( object observer ) {
+		.observers[] = observer;
+	}
+	static function start( number seconds ) {
+		.milliseconds = seconds * 1000;
+		.running = true;
+	}
+	static function update() {
+		if( .running ) {
+			.milliseconds -= Time.delta;
+			if( .milliseconds <= 0 ) {
+				.observers.each() using ( observer ) {
+					observer.onTimeIsUp();
+				};
+				.running = false;
+			}
+		}
+	}
+}
+
 class Game {
 	object camera;
 	object map;
 	object player;
 
 	function start() {
+		GameClock.registerObserver(self);
 		.camera = new PlayerCamera(Config.ScreenWidth, Config.ScreenHeight);
 		.map = Map.load(Config.StartMap);
 		.player = Player.load();
@@ -35,5 +61,9 @@ class Game {
 		.map.renderBackground(.camera);
 		.player.render(.map, .camera);	
 		.map.renderForeground(.camera);
+	}
+
+	function onTimeIsUp() {
+		Application.stop();
 	}
 }
