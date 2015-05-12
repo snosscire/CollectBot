@@ -5,14 +5,15 @@ class InputManager {
 	}
 	static function update() {
 		object event = Engine.nextEvent();
+		boolean stop = true;
 		while( event ) {
-			if( event.type == Engine.EVENT_QUIT ) {
-				keepRunning = false;
-				break;
-			}
 			.devices.each() using ( device ) {
-				device.update(event);
+				stop = not device.onEvent(event);
+				if( stop )
+					return false; // break
 			};
+			if( stop )
+				break;
 			event = Engine.nextEvent();
 		}
 	}
@@ -30,7 +31,7 @@ abstract class InputDevice {
 }
 
 class KeyboardInputDevice extends InputDevice {
-	function update( object event ) {
+	function onEvent( object event ) {
 		if( event.type == Engine.EVENT_KEYDOWN ) {
 			if( event.key == Engine.KEY_LEFT )  .moveLeft = true;
 			if( event.key == Engine.KEY_RIGHT ) .moveRight = true;
@@ -42,5 +43,6 @@ class KeyboardInputDevice extends InputDevice {
 			if( event.key == Engine.KEY_DOWN )  .slide = false;
 			if( event.key == Engine.KEY_SPACE ) .jump = false;
 		}
+		return true;
 	}
 }

@@ -84,7 +84,7 @@ class MapLayer {
 			if( screenX + .texture.width >= 0 )
 				Engine.renderTexture(.texture, screenX, screenY);
 			extra += .texture.width;
-		} while( screenX + .texture.width < Config.ScreenWidth );
+		} while( screenX + .texture.width < camera.screenWidth );
 	}
 }
 
@@ -96,7 +96,7 @@ class MapTile {
 	function render( object camera ) {
 		number screenX = .x - camera.left;
 		number screenY = .y - camera.top;
-		if( screenX + .texture.width >= 0 and screenX <= Config.ScreenWidth )
+		if( screenX + .texture.width >= 0 and screenX <= camera.screenWidth )
 			Engine.renderTexture(.texture, screenX, screenY);
 	}
 }

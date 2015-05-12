@@ -1,0 +1,39 @@
+class Vector {
+	number x;
+	number y;
+
+	function constructor( number x, number y ) {
+		.x = x;
+		.y = y;
+	}
+}
+
+class Rectangle {
+	number x;
+	number y;
+	number width;
+	number height;
+}
+
+class Game {
+	object camera;
+	object map;
+	object player;
+
+	function start() {
+		.camera = new PlayerCamera(Config.ScreenWidth, Config.ScreenHeight);
+		.map = Map.load(Config.StartMap);
+		.player = Player.load();
+	}
+
+	function update() {
+		.player.update(.map);
+		.camera.update(.map, .player);
+	}
+
+	function render() {
+		.map.renderBackground(.camera);
+		.player.render(.map, .camera);	
+		.map.renderForeground(.camera);
+	}
+}

@@ -1,30 +1,10 @@
 uses 'WedoEngine/WedoEngine/Engine';
 uses 'Game/Config';
 uses 'Game/Input';
+uses 'Game/Game';
 uses 'Game/Controller';
 uses 'Game/Map';
 uses 'Game/Player';
-
-global {
-	boolean keepRunning;
-}
-
-class Vector {
-	number x;
-	number y;
-
-	function constructor( number x, number y ) {
-		.x = x;
-		.y = y;
-	}
-}
-
-class Rectangle {
-	number x;
-	number y;
-	number width;
-	number height;
-}
 
 class Time {
 	static number current;
@@ -32,37 +12,42 @@ class Time {
 	static number delta;
 }
 
-object map;
-object player;
-object camera;
+class Application {
+	static boolean run;
+	static function stop() {
+		.run = false;
+	}
+	function onEvent( object event ) {
+		if( event.type == Engine.EVENT_QUIT ) {
+			Application.stop();
+			return false;
+		}
+		return true;
+	}
+}
+
+object application = new Application();
+object game = new Game();
 
 Config.load();
 
-keepRunning = true;
-
 Engine.createWindow(Config.WindowTitle, Config.ScreenWidth, Config.ScreenHeight);
 
-map = Map.load(Config.StartMap);
-player = Player.load();
-camera = new PlayerCamera();
+InputManager.register(application);
+Application.run = true;
+game.start();
 
 Time.last = Engine.currentTime();
 
-while( keepRunning ) {
+while( Application.run ) {
 	Time.current = Engine.currentTime();
 	Time.delta = Time.current - Time.last;
 	Time.last = Time.current;
 
 	InputManager.update();
-
-	player.update(map);
-	camera.update(map, player);
+	game.update();
 
 	Engine.clearScreen();
-
-	map.renderBackground(camera);
-	player.render(map, camera);	
-	map.renderForeground(camera);
-
+	game.render();
 	Engine.updateScreen();	
 }

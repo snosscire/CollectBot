@@ -1,27 +1,34 @@
 class PlayerCamera {
+	number screenWidth;
+	number screenHeight;
 	number left;
 	number right;
 	number top;
 	number bottom;
 
+	function constructor( number screenWidth, number screenHeight ) {
+		.screenWidth = screenWidth;
+		.screenHeight = screenHeight;
+	}
+
 	function update( object map, object player ) {
-		.left = player.x - (Config.ScreenWidth / 2) + (Config.ScreenWidth / 4);
-		.top = player.y - (Config.ScreenHeight / 2);
+		.left = player.x - (.screenWidth / 2) + (.screenWidth / 4);
+		.top = player.y - (.screenHeight / 2);
 		
 		if( .left < 0 ) {
 			.left = 0;
-		} else if( .left > (map.width - Config.ScreenWidth) ) {
-			.left = map.width - Config.ScreenWidth;
+		} else if( .left > (map.width - .screenWidth) ) {
+			.left = map.width - .screenWidth;
 		}
 
 		if( .top < 0 ) {
 			.top = 0;
-		} else if( .top > (map.height - Config.ScreenHeight) ) {
-			.top = map.height - Config.ScreenHeight;
+		} else if( .top > (map.height - .screenHeight) ) {
+			.top = map.height - .screenHeight;
 		}
 
-		.right = .left + Config.ScreenWidth;
-		.bottom = .top + Config.ScreenHeight;
+		.right = .left + .screenWidth;
+		.bottom = .top + .screenHeight;
 	}
 }
 
@@ -171,7 +178,7 @@ class Player {
 		if( camera.left == 0 or camera.right == map.width ) {
 			x = .x - camera.left;
 		} else {
-			x = (Config.ScreenWidth / 2) - (Config.ScreenWidth / 4);
+			x = (camera.screenWidth / 2) - (camera.screenWidth / 4);
 		}
 		if( camera.top == 0 or camera.bottom == map.height ) {
 			y = .y - camera.top;
