@@ -21,8 +21,7 @@ class InputManager {
 abstract class InputDevice {
 	boolean moveLeft;
 	boolean moveRight;
-	boolean moveUp;
-	boolean moveDown;
+	boolean slide;
 	boolean jump;
 
 	function constructor {
@@ -35,14 +34,12 @@ class KeyboardInputDevice extends InputDevice {
 		if( event.type == Engine.EVENT_KEYDOWN ) {
 			if( event.key == Engine.KEY_LEFT )  .moveLeft = true;
 			if( event.key == Engine.KEY_RIGHT ) .moveRight = true;
-			if( event.key == Engine.KEY_UP )    .moveUp = true;
-			if( event.key == Engine.KEY_DOWN )  .moveDown = true;
+			if( event.key == Engine.KEY_DOWN )  .slide = true;
 			if( event.key == Engine.KEY_SPACE ) .jump = true;
 		} else if( event.type == Engine.EVENT_KEYUP ) {
 			if( event.key == Engine.KEY_LEFT )  .moveLeft = false;
 			if( event.key == Engine.KEY_RIGHT ) .moveRight = false;
-			if( event.key == Engine.KEY_UP )    .moveUp = false;
-			if( event.key == Engine.KEY_DOWN )  .moveDown = false;
+			if( event.key == Engine.KEY_DOWN )  .slide = false;
 			if( event.key == Engine.KEY_SPACE ) .jump = false;
 		}
 	}

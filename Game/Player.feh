@@ -32,26 +32,35 @@ class Player {
 	number y;
 	number width;
 	number height;
-	object velocity;
-	object texture;
+
 	object controller;
+	object velocity;
+
+	object texture;
+	object runTexture;
+	object slideTexture;
+
 	boolean moveLeft;
 	boolean moveRight;
-	boolean moveUp;
-	boolean moveDown;
 	boolean jump;
+	boolean slide;
+	boolean sliding;
 	boolean onGround;
+	boolean alive;
 
 	static function load() {
 		object player = new Player();
 		player.controller = new PlayerController(new KeyboardInputDevice());
-		player.texture = Engine.loadTexture('Resources/' + Config.PlayerTexture);
+		player.runTexture = Engine.loadTexture('Resources/' + Config.PlayerRunTexture);
+		player.slideTexture = Engine.loadTexture('Resources/' + Config.PlayerSlideTexture);
+		player.texture = player.runTexture;
 		player.x = Config.PlayerSpawnX;
 		player.y = Config.PlayerSpawnY;
 		player.width = player.texture.width;
 		player.height = player.texture.height;
 		player.gravity = Config.PlayerGravity; // 0.5
 		player.speed = Config.PlayerMoveVelocity; // 3.5
+		//player.alive = true;
 		return player;
 	}
 
@@ -70,25 +79,50 @@ class Player {
 
 	function update( object map ) {
 		object pos = new Vector(.x, .y);
+		boolean collision;
 
-		.controller.update(self);
+		if( .alive ) {
+			.controller.update(self);
 
-		.velocity.x = 0.0;
+			.velocity.x = 0.0;
 
-		if( .moveLeft )  .velocity.x = -.speed;
-		if( .moveRight ) .velocity.x = .speed;
+			if( .moveLeft )  .velocity.x = -.speed;
+			if( .moveRight ) .velocity.x = .speed;
 
-		if( .onGround and .jump ) {
-			.onGround = false;
-			.velocity.y = Config.PlayerJumpVelocity; // -10.0
+			if( .slide ) {
+				if( .onGround ) {
+					.texture = .slideTexture;
+					.width = .slideTexture.width;
+					.height = .slideTexture.height;
+					.sliding = true;
+				}
+			} else {
+				if( .sliding ) {
+					.texture = .runTexture;
+					.width = .runTexture.width;
+					.height = .runTexture.height;
+					.y -= (.runTexture.height - .slideTexture.height) / 2;
+					.sliding = false;
+				}
+
+				if( .onGround and .jump ) {
+					.onGround = false;
+					.velocity.y = Config.PlayerJumpVelocity; // -10.0
+				}
+			}
+
+			.velocity.y += .gravity;
+		} else {
+			if( .x > Config.PlayerSpawnX ) {
+				.velocity.x = Config.PlayerTeleportBackVelocity;
+				.velocity.y = 0.0;
+			}
 		}
-
-		.velocity.y += .gravity;
 
 		pos.x += (Time.delta / 10.0) * .velocity.x;
 		pos.y += (Time.delta / 10.0) * .velocity.y;
 
-		if( .hasCollision(map, pos) ) {
+		if( .alive and .hasCollision(map, pos) ) {
 			boolean has = false;
 			has = .hasCollision(map, new Vector(pos.x, .y)); // x
 			if( not has ) {
@@ -102,17 +136,37 @@ class Player {
 				if( not has ) {
 					// We are here because collision on y has not occured.
 					.y = pos.y;
+				} else {
+					.velocity.y = 0.0;
+					.onGround = true;
 				}
 			}
 		} else {
 			.x = pos.x;
 			.y = pos.y;
+			.onGround = false;
+		}
+
+		if( .alive ) {
+			if( .x > map.width or .y > map.height ) {
+				.alive = false;
+				.y = Config.PlayerSpawnY;
+			}
+		} else {
+			if( .x <= Config.PlayerSpawnX ) {
+				.alive = true;
+				.x = Config.PlayerSpawnX;
+				.y = Config.PlayerSpawnY;
+			}
 		}
 	}
 
 	function render( object map, object camera ) {
 		number x;
 		number y;
+
+		if( not .alive )
+			return;
 
 		if( camera.left == 0 or camera.right == map.width ) {
 			x = .x - camera.left;

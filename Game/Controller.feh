@@ -13,12 +13,16 @@ class MoveFreeController extends Controller {
 		player.moveLeft = .input.moveLeft;
 		player.moveRight = .input.moveRight;
 		player.jump = .input.jump;
+		player.slide = .input.slide;
 	}
 }
 
 class PlayerController extends Controller {
+	boolean previousJumpState;
 	function update( object player ) {
 		player.moveRight = true;
-		player.jump = .input.jump;
+		player.slide = .input.slide;
+		player.jump = (.input.jump and .input.jump != .previousJumpState ? true : false);
+		.previousJumpState = .input.jump;
 	}
 }

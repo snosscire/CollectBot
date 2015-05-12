@@ -96,7 +96,8 @@ class MapTile {
 	function render( object camera ) {
 		number screenX = .x - camera.left;
 		number screenY = .y - camera.top;
-		Engine.renderTexture(.texture, screenX, screenY);
+		if( screenX + .texture.width >= 0 and screenX <= Config.ScreenWidth )
+			Engine.renderTexture(.texture, screenX, screenY);
 	}
 }
 
