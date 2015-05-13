@@ -16,6 +16,7 @@ class Rectangle {
 }
 
 class GameClock {
+	static object font;
 	static boolean running;
 	static number milliseconds;
 	static array observers;
@@ -26,6 +27,8 @@ class GameClock {
 	static function start( number seconds ) {
 		.milliseconds = seconds * 1000;
 		.running = true;
+		if( not .font )
+			.font = Engine.loadFont(Config.GameClockFont, Config.GameClockFontSize);
 	}
 	static function update() {
 		if( .running ) {
@@ -37,6 +40,16 @@ class GameClock {
 				.running = false;
 			}
 		}
+	}
+	static function render() {
+		string m, s;
+		number seconds = (.milliseconds / 1000).round();
+		number minutes = seconds / 60;
+		seconds = seconds % 60;
+//		Engine.printLine('minutes:' + minutes + ', seconds:' + seconds);
+		m = (minutes >= 10 ? '' + minutes : '0' + minutes);
+		s = (seconds >= 10 ? '' + seconds : '0' + seconds);
+		Engine.renderText(.font, "${m}:${s}", 255, 255, 255, 5, 0);
 	}
 }
 

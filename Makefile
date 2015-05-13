@@ -1,6 +1,6 @@
 CC=gcc -g
 FLAGS=-Wall -I/usr/local/include -I/usr/local/include/SDL2
-LIBS=-L/usr/local/lib -lferite -lSDL2 -lSDL2_image
+LIBS=-L/usr/local/lib -lferite -lSDL2 -lSDL2_image -lSDL2_ttf
 SOURCES=main.c \
 	WedoEngine/WedoEngine.c \
 	WedoEngine/ini.c

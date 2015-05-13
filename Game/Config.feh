@@ -33,6 +33,8 @@ Config.setValue('WindowTitle', 'Secret Project');
 Config.setValue('ScreenWidth', 640);
 Config.setValue('ScreenHeight', 480);
 Config.setValue('GameTime', 30);
+Config.setValue('GameClockFont', 'Resources/Fonts/Audiowide/Audiowide-Regular.ttf');
+Config.setValue('GameClockFontSize', 24);
 
 Config.setValue('PlayerSpawnX', 100);
 Config.setValue('PlayerSpawnY', 100);
