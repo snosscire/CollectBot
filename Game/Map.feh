@@ -80,7 +80,7 @@ class MapLayer {
 		number screenY = .y - camera.top;
 		number extra = 0;
 		do {
-			screenX = ((.x - camera.left) * .speed) + extra;
+			screenX = ((.x - camera.left) * .speed).floor() + extra;
 			if( screenX + .texture.width >= 0 )
 				Engine.renderTexture(.texture, screenX, screenY);
 			extra += .texture.width;
