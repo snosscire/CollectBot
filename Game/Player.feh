@@ -87,6 +87,12 @@ class Player {
 		return map.hasCollisionWithGround(rect);
 	}
 
+	function die() {
+		.alive = false;
+		.y = Config.PlayerSpawnY;
+		.currentCoins = 0;
+	}
+
 	function update( object map ) {
 		object pos = new Vector(.x, .y);
 		boolean collision;
@@ -142,14 +148,7 @@ class Player {
 				.velocity.y = 0.0;
 				.onGround = true;
 			} else {
-				has = .hasCollision(map, new Vector(.x, pos.y)); // y
-				if( not has ) {
-					// We are here because collision on y has not occured.
-					.y = pos.y;
-				} else {
-					.velocity.y = 0.0;
-					.onGround = true;
-				}
+				.die();
 			}
 		} else {
 			.x = pos.x;
@@ -159,11 +158,8 @@ class Player {
 
 		if( .alive ) {
 			map.checkForCollisionWithObject(self);
-			if( .x > map.width or .y > map.height ) {
-				.alive = false;
-				.y = Config.PlayerSpawnY;
-				.currentCoins = 0;
-			}
+			if( .x > map.width or .y > map.height )
+				.die();
 		} else {
 			if( .x <= Config.PlayerSpawnX ) {
 				.alive = true;
