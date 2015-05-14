@@ -59,7 +59,7 @@ SOURCES=main.c \
 	ferite/ferite.c \
 	ferite/triton_core.c
 OBJECTS=$(SOURCES:.c=.o)
-PROGRAM=game.exe
+PROGRAM=CollectBot.exe
 
 all: $(OBJECTS) $(PROGRAM)
 
