@@ -26,12 +26,39 @@ class Application {
 	}
 }
 
-array frameTimes;
-number frameTimesIndex;
-number frameCount;
-number framesPerSecond;
-number count;
-object fpsFont = Engine.loadFont('Resources/Fonts/Audiowide/Audiowide-Regular.ttf', 24);
+class FPS {
+	static array times;
+	static number index;
+	static number frames;
+	static number count;
+	static number fps;
+	static object font;
+
+	static function constructor {
+		.times = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+		.frames = 0;
+		.fps = 0;
+	}
+
+	static function update() {
+		.index = .frames % 10;
+		.times[.index] = Time.delta;
+
+		.frames++;
+		.count = (.frames < 10 ? .frames : 10);
+		.fps = 0;
+
+		for( number i = 0; i < .count; i++ )
+			.fps += .times[i];
+
+		.fps /= .count;
+		.fps = (.fps > 0 ? (1000.0 / .fps).round() : 0);
+	}
+
+	static function render() {
+		Engine.renderText(.font, "${.fps}", 255, 255, 255, Config.ScreenWidth - 40, 0);
+	}
+}
 
 object application = new Application();
 object game = new Game();
@@ -40,14 +67,11 @@ Config.load();
 
 Engine.createWindow(Config.WindowTitle, Config.ScreenWidth, Config.ScreenHeight);
 
+FPS.font = Engine.loadFont('Resources/Fonts/Audiowide/Audiowide-Regular.ttf', 24);
 InputManager.register(application);
 Application.run = true;
 GameClock.start(Config.GameTime);
 game.start();
-
-frameTimes = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
-frameCount = 0;
-framesPerSecond = 0;
 
 Time.last = Engine.currentTime();
 
@@ -56,22 +80,7 @@ while( Application.run ) {
 	Time.delta = Time.current - Time.last;
 	Time.last = Time.current;
 
-	frameTimesIndex = frameCount % 10;
-	frameTimes[frameTimesIndex] = Time.delta;
-
-	frameCount++;
-	if( frameCount < 10 ) {
-		count = frameCount;
-	} else {
-		count = 10;
-	}
-	framesPerSecond = 0;
-	for( number i = 0; i < count; i++ ) {
-		framesPerSecond += frameTimes[i];
-	}
-	framesPerSecond /= count;
-	framesPerSecond = (framesPerSecond > 0 ? (1000.0 / framesPerSecond).round() : 0);
-
+	Config.ShowFPS and FPS.update();
 	GameClock.update();
 	InputManager.update();
 	game.update();
@@ -79,6 +88,6 @@ while( Application.run ) {
 	Engine.clearScreen();
 	game.render();
 	GameClock.render();
-	Engine.renderText(fpsFont, "${framesPerSecond}", 255, 255, 255, Config.ScreenWidth - 40, 0);
+	Config.ShowFPS and FPS.render();
 	Engine.updateScreen();	
 }
