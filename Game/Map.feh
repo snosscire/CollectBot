@@ -89,21 +89,33 @@ class MapLayer {
 }
 
 class MapTile {
+	static string TYPE_GROUND = 'ground';
+	static string TYPE_COIN = 'coin';
+
 	number x;
 	number y;
 	object texture;
+	string type;
+	boolean alive;
 
 	function render( object camera ) {
-		number screenX = .x - camera.left;
-		number screenY = .y - camera.top;
-		if( screenX + .texture.width >= 0 and screenX <= camera.screenWidth )
-			Engine.renderTexture(.texture, screenX, screenY);
+		if( .alive ) {
+			number screenX = .x - camera.left;
+			number screenY = .y - camera.top;
+			if( screenX + .texture.width >= 0 and screenX <= camera.screenWidth )
+				Engine.renderTexture(.texture, screenX, screenY);
+		}
+	}
+
+	function remove() {
+		.alive = false;
 	}
 }
 
 class Map {
 	array layers;
 	array tiles;
+	array objects;
 	number width;
 	number height;
 	number tileWidth;
@@ -152,7 +164,8 @@ class Map {
 		if( image ) {
 			array config = Engine.parseINI(basePath + 'Tiles.ini');
 			array sections = config.sectionNames();
-			array colors;
+			array textures;
+			array types;
 
 			sections.each() using ( section ) {
 				array list = config.listBySection(section);
@@ -161,19 +174,26 @@ class Map {
 					                          list.valueByName('Blue', 0));
 				object texture = Engine.loadTexture(basePath + 'Tiles/' + list.valueByName('Texture', ''));
 				if( texture ) {
-					colors["$color"] = texture;
+					textures["$color"] = texture;
+					types["$color"] = list.valueByName('Type', 'ground').toLower();
 				}
 			};
 
 			for( number y = 0; y < image.height; y++ ) {
 				for( number x = 0; x < image.width; x++ ) {
 					number color = image.getPixel(x, y);
-					if( colors.keyExists("$color") ) {
+					if( textures.keyExists("$color") ) {
 						object tile = new MapTile();
 						tile.x = x * .tileWidth;
 						tile.y = y * .tileHeight;
-						tile.texture = colors["$color"];
-						.tiles[] = tile;
+						tile.texture = textures["$color"];
+						tile.type = types["$color"];
+						tile.alive = true;
+
+						if( tile.type == MapTile.TYPE_GROUND )
+							.tiles[] = tile;
+						else
+							.objects[] = tile;
 					}
 				}
 			}
@@ -186,6 +206,12 @@ class Map {
 				layer.render(camera);
 			}
 		};
+		.tiles.each() using ( tile ) {
+			tile.render(camera);
+		};
+		.objects.each() using ( o ) {
+			o.render(camera);
+		};
 	}
 
 	function renderForeground( object camera ) {
@@ -194,25 +220,46 @@ class Map {
 				layer.render(self, camera);
 			}
 		};
-		.tiles.each() using ( tile ) {
-			tile.render(camera);
-		};
 	}
 
-	function hasCollision( object o ) {
+	function hasCollisionWithGround( object player ) {
 		boolean has = false;
 		.tiles.each() using ( tile ) {
 			has = Engine.hasIntersection(tile.x,
 			                             tile.y,
 			                             .tileWidth,
 			                             .tileHeight,
-			                             o.x - (o.width / 2),
-			                             o.y - (o.height / 2),
-			                             o.width,
-			                             o.height);
+			                             player.x - (player.width / 2),
+			                             player.y - (player.height / 2),
+			                             player.width,
+			                             player.height);
 			if( has )
 				return false; // break;
 		};
 		return has;
+	}
+
+	function checkForCollisionWithObject( object player ) {
+		boolean has;
+		.objects.each() using ( o ) {
+			if( o.alive ) {
+				has = Engine.hasIntersection(o.x,
+				                             o.y,
+				                             .tileWidth,
+				                             .tileHeight,
+				                             player.x - (player.width / 2),
+				                             player.y - (player.height / 2),
+				                             player.width,
+				                             player.height);
+				if( has )
+					player.onObjectCollision(o);
+			}
+		};
+	}
+
+	function resetObjects() {
+		.objects.each() using ( o ) {
+			o.alive = true;
+		};
 	}
 }

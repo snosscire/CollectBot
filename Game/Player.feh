@@ -55,6 +55,9 @@ class Player {
 	boolean onGround;
 	boolean alive;
 
+	number totalCoins;
+	number currentCoins;
+
 	static function load() {
 		object player = new Player();
 		player.controller = new PlayerController(new KeyboardInputDevice());
@@ -81,7 +84,7 @@ class Player {
 		rect.y = position.y;
 		rect.width = .width;
 		rect.height = .height;
-		return map.hasCollision(rect);
+		return map.hasCollisionWithGround(rect);
 	}
 
 	function update( object map ) {
@@ -155,40 +158,50 @@ class Player {
 		}
 
 		if( .alive ) {
+			map.checkForCollisionWithObject(self);
 			if( .x > map.width or .y > map.height ) {
 				.alive = false;
 				.y = Config.PlayerSpawnY;
+				.currentCoins = 0;
 			}
 		} else {
 			if( .x <= Config.PlayerSpawnX ) {
 				.alive = true;
 				.x = Config.PlayerSpawnX;
 				.y = Config.PlayerSpawnY;
+				map.resetObjects();
 			}
 		}
 	}
 
 	function render( object map, object camera ) {
-		number x;
-		number y;
+		if( .alive ) {
+			number x;
+			number y;
 
-		if( not .alive )
-			return;
+			if( camera.left == 0 or camera.right == map.width ) {
+				x = .x - camera.left;
+			} else {
+				x = (camera.screenWidth / 2) - (camera.screenWidth / 4);
+			}
+			if( camera.top == 0 or camera.bottom == map.height ) {
+				y = .y - camera.top;
+			} else {
+				y = camera.screenHeight / 2;
+			}
 
-		if( camera.left == 0 or camera.right == map.width ) {
-			x = .x - camera.left;
-		} else {
-			x = (camera.screenWidth / 2) - (camera.screenWidth / 4);
+			x -= .width / 2;
+			y -= .height / 2;
+
+			Engine.renderTexture(.texture, x, y);
 		}
-		if( camera.top == 0 or camera.bottom == map.height ) {
-			y = .y - camera.top;
-		} else {
-			y = camera.screenHeight / 2;
+		Engine.renderText(Application.HUDfont, "${.currentCoins}", 255, 255, 255, 5, camera.screenHeight - 30);
+	}
+
+	function onObjectCollision( object o ) {
+		if( o.type == MapTile.TYPE_COIN ) {
+			.currentCoins++;
+			o.remove();
 		}
-
-		x -= .width / 2;
-		y -= .height / 2;
-
-		Engine.renderTexture(.texture, x, y);
 	}
 }

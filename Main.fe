@@ -13,6 +13,7 @@ class Time {
 }
 
 class Application {
+	static object HUDfont;
 	static boolean run;
 	static function stop() {
 		.run = false;
@@ -32,7 +33,6 @@ class FPS {
 	static number frames;
 	static number count;
 	static number fps;
-	static object font;
 
 	static function constructor {
 		.times = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
@@ -56,7 +56,7 @@ class FPS {
 	}
 
 	static function render() {
-		Engine.renderText(.font, "${.fps}", 255, 255, 255, Config.ScreenWidth - 40, 0);
+		Engine.renderText(Application.HUDfont, "${.fps}", 255, 255, 255, Config.ScreenWidth - 40, 0);
 	}
 }
 
@@ -67,8 +67,8 @@ Config.load();
 
 Engine.createWindow(Config.WindowTitle, Config.ScreenWidth, Config.ScreenHeight);
 
-FPS.font = Engine.loadFont('Resources/Fonts/Audiowide/Audiowide-Regular.ttf', 24);
 InputManager.register(application);
+Application.HUDfont = Engine.loadFont('Resources/Fonts/Audiowide/Audiowide-Regular.ttf', 24);
 Application.run = true;
 GameClock.start(Config.GameTime);
 game.start();
