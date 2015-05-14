@@ -1,6 +1,9 @@
 Extra/*
 Resources/*
 WedoEngine.custom/*
+ferite/*
 Test.fe
 game.osx
+game.exe
 *.o
+*.dll
