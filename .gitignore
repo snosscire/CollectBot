@@ -1,9 +1,10 @@
 Extra/*
+Resources
 Resources/*
 WedoEngine.custom/*
 ferite/*
 Test.fe
-game.osx
-game.exe
+CollectBot.exe
 *.o
 *.dll
+sync.sh
