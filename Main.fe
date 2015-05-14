@@ -26,6 +26,13 @@ class Application {
 	}
 }
 
+array frameTimes;
+number frameTimesIndex;
+number frameCount;
+number framesPerSecond;
+number count;
+object fpsFont = Engine.loadFont('Resources/Fonts/Audiowide/Audiowide-Regular.ttf', 24);
+
 object application = new Application();
 object game = new Game();
 
@@ -38,12 +45,32 @@ Application.run = true;
 GameClock.start(Config.GameTime);
 game.start();
 
+frameTimes = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+frameCount = 0;
+framesPerSecond = 0;
+
 Time.last = Engine.currentTime();
 
 while( Application.run ) {
 	Time.current = Engine.currentTime();
 	Time.delta = Time.current - Time.last;
 	Time.last = Time.current;
+
+	frameTimesIndex = frameCount % 10;
+	frameTimes[frameTimesIndex] = Time.delta;
+
+	frameCount++;
+	if( frameCount < 10 ) {
+		count = frameCount;
+	} else {
+		count = 10;
+	}
+	framesPerSecond = 0;
+	for( number i = 0; i < count; i++ ) {
+		framesPerSecond += frameTimes[i];
+	}
+	framesPerSecond /= count;
+	framesPerSecond = (framesPerSecond > 0 ? (1000.0 / framesPerSecond).round() : 0);
 
 	GameClock.update();
 	InputManager.update();
@@ -52,5 +79,6 @@ while( Application.run ) {
 	Engine.clearScreen();
 	game.render();
 	GameClock.render();
+	Engine.renderText(fpsFont, "${framesPerSecond}", 255, 255, 255, Config.ScreenWidth - 40, 0);
 	Engine.updateScreen();	
 }
