@@ -123,7 +123,7 @@ class Player {
 					.texture = .runTexture;
 					.width = .runTexture.width;
 					.height = .runTexture.height;
-					.y -= (.runTexture.height - .slideTexture.height) / 2;
+					.y -= ((.runTexture.height - .slideTexture.height) / 2) + 1;
 					.sliding = false;
 				}
 
@@ -199,7 +199,11 @@ class Player {
 			y -= .height / 2;
 
 			Engine.renderTexture(.texture, x, y);
-			.wheelSprite.render(x + (.width / 2) - 3, y + (.height / 2) + 21, camera);
+			.wheelSprite.render(
+					x + (.width / 2) + (.sliding ? 16 : -3),
+					y + (.height / 2) + (.sliding ? 8 : 21),
+					camera
+				);
 		}
 		Engine.renderText(Application.HUDfont, "${.currentCoins}", 255, 255, 255, 5 + camera.screenX, camera.screenHeight - 30 + camera.screenY);
 	}
