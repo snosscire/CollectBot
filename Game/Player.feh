@@ -1,4 +1,6 @@
 class PlayerCamera {
+	number screenX;
+	number screenY;
 	number screenWidth;
 	number screenHeight;
 	number left;
@@ -6,7 +8,9 @@ class PlayerCamera {
 	number top;
 	number bottom;
 
-	function constructor( number screenWidth, number screenHeight ) {
+	function constructor( number screenX, number screenY, number screenWidth, number screenHeight ) {
+		.screenX = screenX;
+		.screenY = screenY;
 		.screenWidth = screenWidth;
 		.screenHeight = screenHeight;
 	}
@@ -59,11 +63,11 @@ class Player {
 	number totalCoins;
 	number currentCoins;
 
-	static function load() {
+	static function load( object inputDevice ) {
 		object player = new Player();
-		player.controller = new PlayerController(new KeyboardInputDevice());
-		player.runTexture = Engine.loadTexture('Resources/' + Config.PlayerRunTexture);
-		player.slideTexture = Engine.loadTexture('Resources/' + Config.PlayerSlideTexture);
+		player.controller = new PlayerController(inputDevice);
+		player.runTexture = ResourceManager.loadTexture('Resources/' + Config.PlayerRunTexture);
+		player.slideTexture = ResourceManager.loadTexture('Resources/' + Config.PlayerSlideTexture);
 		player.texture = player.runTexture;
 		player.x = Config.PlayerSpawnX;
 		player.y = Config.PlayerSpawnY;
@@ -72,16 +76,6 @@ class Player {
 		player.gravity = Config.PlayerGravity; // 0.5
 		player.speed = Config.PlayerMoveVelocity; // 3.5
 		player.alive = true;
-		/*
-		player.wheelSprite = (closure {
-			object sprite = new Sprite();
-			sprite.play = true;
-			sprite.addFrame('Resources/oneBot_wheel01.png', 10);
-			sprite.addFrame('Resources/oneBot_wheel02.png', 10);
-			sprite.addFrame('Resources/oneBot_wheel03.png', 10);
-			return sprite;
-		}).invoke();
-		*/
 		player.wheelSprite = Sprite.load('PlayerWheel');
 		return player;
 	}
@@ -190,15 +184,15 @@ class Player {
 			number x;
 			number y;
 
-			if( camera.left == 0 or camera.right == map.width ) {
-				x = .x - camera.left;
+			if( camera.left == camera.screenX or camera.right == map.width ) {
+				x = .x - camera.left + camera.screenX;
 			} else {
-				x = (camera.screenWidth / 2) - (camera.screenWidth / 4);
+				x = (camera.screenWidth / 2) - (camera.screenWidth / 4) + camera.screenX;
 			}
-			if( camera.top == 0 or camera.bottom == map.height ) {
-				y = .y - camera.top;
+			if( camera.top == camera.screenY or camera.bottom == map.height ) {
+				y = .y - camera.top + camera.screenY;
 			} else {
-				y = camera.screenHeight / 2;
+				y = (camera.screenHeight / 2) + camera.screenY;
 			}
 
 			x -= .width / 2;
@@ -207,7 +201,7 @@ class Player {
 			Engine.renderTexture(.texture, x, y);
 			.wheelSprite.render(x + (.width / 2) - 3, y + (.height / 2) + 21, camera);
 		}
-		Engine.renderText(Application.HUDfont, "${.currentCoins}", 255, 255, 255, 5, camera.screenHeight - 30);
+		Engine.renderText(Application.HUDfont, "${.currentCoins}", 255, 255, 255, 5 + camera.screenX, camera.screenHeight - 30 + camera.screenY);
 	}
 
 	function onObjectCollision( object o ) {

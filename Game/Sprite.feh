@@ -27,7 +27,7 @@ class Sprite {
 	}
 
 	function addFrame( string file, number time ) {
-		object texture = Engine.loadTexture(file);
+		object texture = ResourceManager.loadTexture(file);
 		if( texture ) {
 			object frame = new SpriteFrame();
 			frame.texture = texture;
@@ -44,20 +44,22 @@ class Sprite {
 
 	function render( number x, number y, object camera ) {
 		if( .frames ) {
-			object currentFrame = .frames[.currentFrame];
 			if( .play ) {
 				.currentTime += Time.delta;
-				if( .currentTime >= currentFrame.time ) {
-					.currentTime -= currentFrame.time;
+				if( .currentTime >= .frames[.currentFrame].time ) {
+					.currentTime -= .frames[.currentFrame].time;
 					.nextFrame();
-					currentFrame = .frames[.currentFrame];
 				}
 			}
-			if( x + currentFrame.texture.width >= 0 and y <= camera.screenWidth ) {
+			if( x + .frames[.currentFrame].texture.width >= 0 and
+				x <= camera.screenWidth + camera.screenX and
+				y + .frames[.currentFrame].texture.height >= 0 and
+				y <= camera.screenHeight + camera.screenY )
+			{
 				Engine.renderTexture(
-						currentFrame.texture,
-						x - (.center ? (currentFrame.texture.width / 2) : 0),
-						y - (.center ? (currentFrame.texture.height / 2) : 0)
+						.frames[.currentFrame].texture,
+						x - (.center ? (.frames[.currentFrame].texture.width / 2) : 0),
+						y - (.center ? (.frames[.currentFrame].texture.height / 2) : 0)
 					);
 			}
 		}

@@ -46,3 +46,16 @@ class KeyboardInputDevice extends InputDevice {
 		return true;
 	}
 }
+
+class MouseInputDevice extends InputDevice {
+	function onEvent( object event ) {
+		if( event.type == Engine.EVENT_MOUSEBUTTONDOWN ) {
+			if( event.button == 1 ) .jump = true;
+			if( event.button == 3 ) .slide = true;
+		} else if( event.type == Engine.EVENT_MOUSEBUTTONUP ) {
+			if( event.button == 1 ) .jump = false;
+			if( event.button == 3 ) .slide = false;
+		}
+		return true;
+	}
+}

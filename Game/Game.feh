@@ -13,6 +13,13 @@ class Rectangle {
 	number y;
 	number width;
 	number height;
+
+	function constructor( number x, number y, number w, number h ) {
+		.x = x;
+		.y = y;
+		.width = w;
+		.height = h;
+	}
 }
 
 class GameClock {
@@ -46,10 +53,60 @@ class GameClock {
 		number seconds = (.milliseconds / 1000).round();
 		number minutes = seconds / 60;
 		seconds = seconds % 60;
-//		Engine.printLine('minutes:' + minutes + ', seconds:' + seconds);
 		m = (minutes >= 10 ? '' + minutes : '0' + minutes);
 		s = (seconds >= 10 ? '' + seconds : '0' + seconds);
 		Engine.renderText(.font, "${m}:${s}", 255, 255, 255, 5, 0);
+	}
+}
+
+class GameManager {
+	static array dimensions;
+	static array games;
+	static array inputDevices;
+
+	static function initialize() {
+		.inputDevices[] = new KeyboardInputDevice();
+		.inputDevices[] = new MouseInputDevice();
+		.inputDevices[] = new KeyboardInputDevice();
+		.inputDevices[] = new KeyboardInputDevice();
+
+		.dimensions['1'] = [];
+		.dimensions['2'] = [];
+		.dimensions['4'] = [];
+
+		.dimensions['1'][] = new Rectangle(0, 0, Config.ScreenWidth, Config.ScreenHeight);
+
+		.dimensions['2'][] = new Rectangle(0, 0, Config.ScreenWidth, Config.ScreenHeight / 2);
+		.dimensions['2'][] = new Rectangle(0, Config.ScreenHeight / 2, Config.ScreenWidth, Config.ScreenHeight / 2);
+
+		.dimensions['4'][] = new Rectangle(0, 0, Config.ScreenWidth / 2, Config.ScreenHeight / 2); // top left
+		.dimensions['4'][] = new Rectangle(Config.ScreenWidth / 2, 0, Config.ScreenWidth / 2, Config.ScreenHeight / 2); // top right
+		.dimensions['4'][] = new Rectangle(0, Config.ScreenHeight / 2, Config.ScreenWidth / 2, Config.ScreenHeight / 2); // bottom left
+		.dimensions['4'][] = new Rectangle(Config.ScreenWidth / 2, Config.ScreenHeight / 2, Config.ScreenWidth / 2, Config.ScreenHeight / 2); // bottom right
+
+		.dimensions['3'] = .dimensions['4'];
+	}
+
+	static function start( number games ) {
+		for( number i = 0; i < games; i++ ) {
+			object game = new Game();
+			object screenPosition = .dimensions["$games"][i];
+			object playerInputDevice = .inputDevices[i];
+			game.start(screenPosition, playerInputDevice);
+			.games[] = game;
+		}
+	}
+
+	static function update() {
+		for( number i = 0; i < .games.size(); i++ ) {
+			.games[i].update();
+		}
+	}
+
+	static function render() {
+		for( number i = 0; i < .games.size(); i++ ) {
+			.games[i].render();
+		}
 	}
 }
 
@@ -58,11 +115,11 @@ class Game {
 	object map;
 	object player;
 
-	function start() {
+	function start( object screenPosition, object playerController ) {
 		GameClock.registerObserver(self);
-		.camera = new PlayerCamera(Config.ScreenWidth, Config.ScreenHeight);
+		.camera = new PlayerCamera(screenPosition.x, screenPosition.y, screenPosition.width, screenPosition.height);
 		.map = Map.load(Config.StartMap);
-		.player = Player.load();
+		.player = Player.load(playerController);
 	}
 
 	function update() {
@@ -71,9 +128,11 @@ class Game {
 	}
 
 	function render() {
+		Engine.setClipRectangle(.camera.screenX, .camera.screenY, .camera.screenWidth, .camera.screenHeight);
 		.map.renderBackground(.camera);
 		.player.render(.map, .camera);	
 		.map.renderForeground(.camera);
+		Engine.setClipRectangle(0, 0, Config.ScreenWidth, Config.ScreenHeight);
 	}
 
 	function onTimeIsUp() {

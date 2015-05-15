@@ -8,14 +8,14 @@ class MapLayer {
 
 	function render( object camera ) {
 		number screenX;
-		number screenY = .y - camera.top;
+		number screenY = .y - camera.top + camera.screenY;
 		number extra = 0;
 		do {
-			screenX = ((.x - camera.left) * .speed).floor() + extra;
-			if( screenX + .texture.width >= 0 )
+			screenX = ((.x + camera.screenX - camera.left) * .speed).floor() + extra;
+			if( screenX + .texture.width >= camera.screenX )
 				Engine.renderTexture(.texture, screenX, screenY);
 			extra += .texture.width;
-		} while( screenX + .texture.width < camera.screenWidth );
+		} while( screenX + .texture.width < camera.screenWidth + camera.screenX );
 	}
 }
 
@@ -31,9 +31,20 @@ class MapTile {
 
 	function render( object camera ) {
 		if( .alive ) {
-			number screenX = .x - camera.left;
-			number screenY = .y - camera.top;
-			.sprite.render(screenX, screenY, camera);
+			number screenX = .x - camera.left + camera.screenX;
+			number screenY = .y - camera.top + camera.screenY;
+			if( .type == MapTile.TYPE_GROUND ) {
+				object texture = .sprite.frames[0].texture;
+				if( screenX + texture.width >= 0 and
+					screenX <= camera.screenWidth + camera.screenX and
+					screenY + texture.height >= 0 and
+					screenY <= camera.screenHeight + camera.screenY )
+				{
+					Engine.renderTexture(texture, screenX, screenY);
+				}
+			} else {
+				.sprite.render(screenX, screenY, camera);
+			}
 		}
 	}
 
@@ -73,7 +84,7 @@ class Map {
 
 		sections.each() using ( section ) {
 			array list = config.listBySection(section);
-			object texture = Engine.loadTexture(basePath + 'Layers/' + list.valueByName('Texture', ''));
+			object texture = ResourceManager.loadTexture(basePath + 'Layers/' + list.valueByName('Texture', ''));
 
 			if( texture ) {
 				number x = list.valueByName('X', 0);
@@ -104,7 +115,7 @@ class Map {
 					                          list.valueByName('Blue', 0));
 				string textureName = list.valueByName('Texture', '');
 				string spriteName = list.valueByName('Sprite', '');
-				object texture = (textureName ? Engine.loadTexture(basePath + 'Tiles/' + textureName) : null);
+				object texture = (textureName ? ResourceManager.loadTexture(basePath + 'Tiles/' + textureName) : null);
 				object sprite = (spriteName ? Sprite.load(spriteName) : null);
 				if( texture or sprite ) {
 					if( not sprite ) {
@@ -133,7 +144,7 @@ class Map {
 						tile.alive = true;
 
 						if( tile.type == MapTile.TYPE_GROUND )
-							.tiles[] = tile;
+							.tiles["${tile.x},${tile.y}"] = tile;
 						else
 							.objects[] = tile;
 					}
@@ -143,32 +154,32 @@ class Map {
 	}
 
 	function renderBackground( object camera ) {
-		.layers.each() using ( layer ) {
-			if( layer.level <= 0 ) {
-				layer.render(camera);
+		for( number i = 0; i < .layers.size(); i++ ) {
+			if( .layers[i].level <= 0 ) {
+				.layers[i].render(camera);
 			}
-		};
-		.tiles.each() using ( tile ) {
-			tile.render(camera);
-		};
-		.objects.each() using ( o ) {
-			o.render(camera);
-		};
+		}
+		for( number i = 0; i < .tiles.size(); i++ ) {
+			.tiles[i].render(camera);
+		}
+		for( number i = 0; i < .objects.size(); i++ ) {
+			.objects[i].render(camera);
+		}
 	}
 
 	function renderForeground( object camera ) {
-		.layers.each() using ( layer ) {
-			if( layer.level > 0 ) {
-				layer.render(self, camera);
+		for( number i = 0; i < .layers.size(); i++ ) {
+			if( .layers[i].level > 0 ) {
+				.layers[i].render(camera);
 			}
-		};
+		}
 	}
 
 	function hasCollisionWithGround( object player ) {
 		boolean has = false;
-		.tiles.each() using ( tile ) {
-			has = Engine.hasIntersection(tile.x,
-			                             tile.y,
+		for( number i = 0; i < .tiles.size(); i++ ) {
+			has = Engine.hasIntersection(.tiles[i].x,
+			                             .tiles[i].y,
 			                             .tileWidth,
 			                             .tileHeight,
 			                             player.x - (player.width / 2),
@@ -176,17 +187,17 @@ class Map {
 			                             player.width,
 			                             player.height);
 			if( has )
-				return false; // break;
+				break;
 		};
 		return has;
 	}
 
 	function checkForCollisionWithObject( object player ) {
 		boolean has;
-		.objects.each() using ( o ) {
-			if( o.alive ) {
-				has = Engine.hasIntersection(o.x,
-				                             o.y,
+		for( number i = 0; i < .objects.size(); i++ ) {
+			if( .objects[i].alive ) {
+				has = Engine.hasIntersection(.objects[i].x,
+				                             .objects[i].y,
 				                             .tileWidth,
 				                             .tileHeight,
 				                             player.x - (player.width / 2),
@@ -194,9 +205,9 @@ class Map {
 				                             player.width,
 				                             player.height);
 				if( has )
-					player.onObjectCollision(o);
+					player.onObjectCollision(.objects[i]);
 			}
-		};
+		}
 	}
 
 	function resetObjects() {

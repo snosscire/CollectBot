@@ -7,6 +7,19 @@ uses 'Game/Map';
 uses 'Game/Player';
 uses 'Game/Sprite';
 
+class ResourceManager {
+	static array textures;
+
+	static function loadTexture( string path ) {
+		object texture = (.textures.keyExists(path) ? .textures[path] : null);
+		if( not texture ) {
+			texture = Engine.loadTexture(path);
+			.textures[path] = texture;
+		}
+		return texture;
+	}
+}
+
 class Time {
 	static number current;
 	static number last;
@@ -71,8 +84,9 @@ Engine.createWindow(Config.WindowTitle, Config.ScreenWidth, Config.ScreenHeight)
 InputManager.register(application);
 Application.HUDfont = Engine.loadFont('Resources/Fonts/Audiowide/Audiowide-Regular.ttf', 24);
 Application.run = true;
+GameManager.initialize();
+GameManager.start(1);
 GameClock.start(Config.GameTime);
-game.start();
 
 Time.last = Engine.currentTime();
 
@@ -84,11 +98,11 @@ while( Application.run ) {
 	Config.ShowFPS and FPS.update();
 	GameClock.update();
 	InputManager.update();
-	game.update();
+	GameManager.update();
 
 	Engine.clearScreen();
-	game.render();
+	GameManager.render();
 	GameClock.render();
 	Config.ShowFPS and FPS.render();
-	Engine.updateScreen();	
+	Engine.updateScreen();
 }
