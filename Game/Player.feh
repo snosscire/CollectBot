@@ -93,10 +93,10 @@ class Player {
 		return map.hasCollisionWithGround(rect);
 	}
 
-	function die() {
+	function die( boolean resetCoins ) {
 		.alive = false;
 		.y = Config.PlayerSpawnY;
-		.currentCoins = 0;
+		resetCoins and .currentCoins = 0;
 	}
 
 	function update( object map ) {
@@ -156,7 +156,7 @@ class Player {
 				.onGround = true;
 				.wheelSprite.play = true;
 			} else {
-				.die();
+				.die(true);
 			}
 		} else {
 			.x = pos.x;
@@ -167,8 +167,10 @@ class Player {
 
 		if( .alive ) {
 			map.checkForCollisionWithObject(self);
-			if( .x > map.width or .y > map.height )
-				.die();
+			if( .x > map.width or .y > map.height ) {
+				boolean resetCoins = (.x > map.width ? false : true);
+				.die(resetCoins);
+			}
 		} else {
 			if( .x <= Config.PlayerSpawnX ) {
 				.alive = true;
