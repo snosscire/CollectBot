@@ -47,6 +47,8 @@ class Player {
 	object controller;
 	object velocity;
 
+	object chestTexture;
+	object coinTexture;
 	object texture;
 	object runTexture;
 	object slideTexture;
@@ -60,12 +62,14 @@ class Player {
 	boolean onGround;
 	boolean alive;
 
-	number totalCoins;
+	number chestCoins;
 	number currentCoins;
 
 	static function load( object inputDevice ) {
 		object player = new Player();
 		player.controller = new PlayerController(inputDevice);
+		player.chestTexture = ResourceManager.loadTexture('Resources/chest_icon.png');
+		player.coinTexture = ResourceManager.loadTexture('Resources/tiny_fox_coin.png');
 		player.runTexture = ResourceManager.loadTexture('Resources/' + Config.PlayerRunTexture);
 		player.slideTexture = ResourceManager.loadTexture('Resources/' + Config.PlayerSlideTexture);
 		player.texture = player.runTexture;
@@ -207,7 +211,38 @@ class Player {
 					camera
 				);
 		}
-		Engine.renderText(Application.HUDfont, "${.currentCoins}", 255, 255, 255, 5 + camera.screenX, camera.screenHeight - 30 + camera.screenY);
+		.renderHUD(camera);
+	}
+
+	function renderHUD( object camera ) {
+		Engine.renderTexture(
+				.chestTexture,
+				5 + camera.screenX,
+				camera.screenHeight - 5 - .chestTexture.height + camera.screenY
+			);
+		Engine.renderText(
+				Application.HUDfont,
+				"${.chestCoins}",
+				255,
+				255,
+				255,
+				5 + .chestTexture.width + 5 + camera.screenX,
+				camera.screenHeight - 2 - .chestTexture.height + camera.screenY
+			);
+		Engine.renderTexture(
+				.coinTexture,
+				9 + camera.screenX,
+				camera.screenHeight - 9 - .chestTexture.height - 5 - 30 + camera.screenY
+			);
+		Engine.renderText(
+				Application.HUDfont,
+				"${.currentCoins}",
+				255,
+				255,
+				255,
+				5 + .chestTexture.width + 5 + camera.screenX,
+				camera.screenHeight - 2 - .chestTexture.height - 5 - 35 + camera.screenY
+			);
 	}
 
 	function onObjectCollision( object o ) {
