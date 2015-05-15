@@ -62,6 +62,7 @@ class Player {
 	boolean onGround;
 	boolean alive;
 	boolean pause;
+	boolean showScore;
 
 	number chestCoins;
 	number currentCoins;
@@ -91,6 +92,8 @@ class Player {
 		.gravity = Config.PlayerGravity; // 0.5
 		.speed = Config.PlayerMoveVelocity; // 3.5
 		.alive = true;
+		.pause = false;
+		.showScore = false;
 	}
 
 	function transferCoins() {
@@ -125,7 +128,12 @@ class Player {
 		if( .pause ) {
 			.controller.update(self);
 			if( .slide or .jump ) {
-				.pause = false;
+				if( .showScore ) {
+					GameManager.reset();
+					return;
+				} else {
+					.pause = false;
+				}
 			} else {
 				return;
 			}
@@ -238,7 +246,28 @@ class Player {
 				);
 		}
 		.renderHUD(camera);
-		if( .pause ) {
+		if( .pause and .showScore ) {
+			number coins = .chestCoins + .currentCoins;
+			Engine.renderTexture(
+				.chestTexture,
+					(camera.screenWidth / 2) - 100 + camera.screenX,
+					(camera.screenHeight / 2) - 30 + camera.screenY
+			);
+			Engine.renderText(
+					Application.HUDfont,
+					"${coins}",
+					255, 255, 255,
+					(camera.screenWidth / 2) - 50 + camera.screenX,
+					(camera.screenHeight / 2) - 20 + camera.screenY
+				);
+			Engine.renderText(
+					Application.HUDfont,
+					"Press [jump] or [slide] to start next game.",
+					255, 255, 255,
+					(camera.screenWidth / 2) - 220 + camera.screenX,
+					(camera.screenHeight / 2) + 40 + camera.screenY
+				);
+		} else if( .pause ) {
 			Engine.renderText(
 					Application.HUDfont,
 					"Press [jump] or [slide] to run again.",
@@ -282,5 +311,10 @@ class Player {
 			.currentCoins++;
 			o.remove();
 		}
+	}
+
+	function showScore() {
+		.pause = true;
+		.showScore = true;
 	}
 }

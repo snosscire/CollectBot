@@ -116,6 +116,12 @@ class GameManager {
 		}
 	}
 
+	static function showScore() {
+		.games.each() using ( game ) {
+			game.showScore();
+		};
+	}
+
 	static function reset() {
 		.games.each() using ( game ) {
 			game.reset();
@@ -124,7 +130,7 @@ class GameManager {
 	}
 
 	function onTimeIsUp() {
-		GameManager.reset();
+		GameManager.showScore();
 	}
 
 	function onEvent( object event ) {
@@ -151,6 +157,10 @@ class Game {
 		.camera = new PlayerCamera(screenPosition.x, screenPosition.y, screenPosition.width, screenPosition.height);
 		.map = Map.load(Config.StartMap);
 		.player = Player.load(playerController);
+	}
+
+	function showScore() {
+		.player.showScore();
 	}
 
 	function reset() {
