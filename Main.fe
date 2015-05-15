@@ -78,15 +78,15 @@ class FPS {
 }
 
 object application = new Application();
-object game = new Game();
+object splashScreen = new SplashScreen();
 
 Config.load();
 
 Engine.createWindow(Config.WindowTitle, Config.ScreenWidth, Config.ScreenHeight);
 
-SplashScreen.milliseconds = Engine.currentTime() + (Config.SplashScreenTimeout * 1000);
-SplashScreen.texture = Engine.loadTexture(Config.SplashScreenTexture);
-SplashScreen.render();
+splashScreen.milliseconds = Engine.currentTime() + (Config.SplashScreenTimeout * 1000);
+splashScreen.texture = Engine.loadTexture(Config.SplashScreenTexture);
+splashScreen.render();
 
 InputManager.register(application);
 Application.application = application;
@@ -107,6 +107,7 @@ while( Application.run ) {
 	InputManager.update();
 
 	if( not Application.inMainMenu ) {
+		FPS.update();
 		GameClock.update();
 		GameManager.update();
 	}

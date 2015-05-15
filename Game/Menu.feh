@@ -1,8 +1,7 @@
 class SplashScreen {
-	static boolean shouldRender;
-	static number milliseconds;
-	static object texture;
-	static function render() {
+	number milliseconds;
+	object texture;
+	function render() {
 		Engine.clearScreen();
 		Engine.renderTexture(
 				.texture,
@@ -18,6 +17,7 @@ class MainMenu {
 	static object menu;
 	static object backgroundTexture;
 	static object selectorTexture;
+	static object startScreen;
 	static number option = 0;
 
 	static function initialize() {
@@ -25,6 +25,8 @@ class MainMenu {
 		InputManager.register(.menu);
 		.backgroundTexture = Engine.loadTexture('Resources/UI/start_menu_BG.png');
 		.selectorTexture = Engine.loadTexture('Resources/UI/bot_selector.png');
+		.startScreen = new SplashScreen();
+		.startScreen.texture = Engine.loadTexture(Config.StartScreenTexture);
 	}
 
 	static function render() {
@@ -45,9 +47,19 @@ class MainMenu {
 			Application.stop();
 		} else {
 			number players = .option + 1;
+
 			Application.inMainMenu = false;
+
 			InputManager.clear();
 			InputManager.register(Application.application);
+
+			.startScreen.milliseconds = Engine.currentTime() + (Config.StartScreenTimeout * 1000);
+			.startScreen.render();
+
+			Time.current = Engine.currentTime();
+			Time.delta = 0;
+			Time.last = Time.current;
+
 			GameManager.start(players);
 			GameClock.start(Config.GameTime);
 		}
