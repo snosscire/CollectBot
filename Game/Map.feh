@@ -22,28 +22,31 @@ class MapLayer {
 class MapTile {
 	static string TYPE_GROUND = 'ground';
 	static string TYPE_COIN = 'coin';
+	static string TYPE_DECORATION = 'decoration';
 
 	number x;
 	number y;
 	object sprite;
 	string type;
 	boolean alive;
+	boolean coin;
+	number screenX;
+	number screenY;
 
 	function render( object camera ) {
 		if( .alive ) {
-			number screenX = .x - camera.left + camera.screenX;
-			number screenY = .y - camera.top + camera.screenY;
-			if( .type == MapTile.TYPE_GROUND ) {
-				object texture = .sprite.frames[0].texture;
-				if( screenX + texture.width >= 0 and
-					screenX <= camera.screenWidth + camera.screenX and
-					screenY + texture.height >= 0 and
-					screenY <= camera.screenHeight + camera.screenY )
-				{
-					Engine.renderTexture(texture, screenX, screenY);
-				}
+			.screenX = .x - camera.left + camera.screenX;
+			.screenY = .y - camera.top + camera.screenY;
+			if( .coin ) {
+				.sprite.render(.screenX, .screenY, camera);
 			} else {
-				.sprite.render(screenX, screenY, camera);
+				if( .screenX + .sprite.frames[0].texture.width >= 0 and
+					.screenX <= camera.screenWidth + camera.screenX and
+					.screenY + .sprite.frames[0].texture.height >= 0 and
+					.screenY <= camera.screenHeight + camera.screenY )
+				{
+					Engine.renderTexture(.sprite.frames[0].texture, .screenX, .screenY);
+				}
 			}
 		}
 	}
@@ -56,6 +59,7 @@ class MapTile {
 class Map {
 	array layers;
 	array tiles;
+	array tilesWithCollision;
 	array objects;
 	number width;
 	number height;
@@ -143,10 +147,14 @@ class Map {
 						tile.type = types["$color"];
 						tile.alive = true;
 
-						if( tile.type == MapTile.TYPE_GROUND )
-							.tiles["${tile.x},${tile.y}"] = tile;
-						else
+						if( tile.type == MapTile.TYPE_COIN ) {
+							tile.coin = true;
 							.objects[] = tile;
+						} else {
+							.tiles[] = tile;
+							if( tile.type == MapTile.TYPE_GROUND )
+								.tilesWithCollision[] = tile;
+						}
 					}
 				}
 			}
@@ -177,9 +185,9 @@ class Map {
 
 	function hasCollisionWithGround( object player ) {
 		boolean has = false;
-		for( number i = 0; i < .tiles.size(); i++ ) {
-			has = Engine.hasIntersection(.tiles[i].x,
-			                             .tiles[i].y,
+		for( number i = 0; i < .tilesWithCollision.size(); i++ ) {
+			has = Engine.hasIntersection(.tilesWithCollision[i].x,
+			                             .tilesWithCollision[i].y,
 			                             .tileWidth,
 			                             .tileHeight,
 			                             player.x - (player.width / 2),
