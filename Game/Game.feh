@@ -152,10 +152,12 @@ class Game {
 	object camera;
 	object map;
 	object player;
+	string previousMap;
 
 	function start( object screenPosition, object playerController ) {
 		.camera = new PlayerCamera(screenPosition.x, screenPosition.y, screenPosition.width, screenPosition.height);
 		.map = Map.load(Config.StartMap);
+		.previousMap = Config.StartMap;
 		.player = Player.load(playerController);
 	}
 
@@ -164,7 +166,9 @@ class Game {
 	}
 
 	function reset() {
-		.map = Map.load(Config.StartMap);
+		string nextMap = (.previousMap == Config.StartMap ? Config.OtherMap : Config.StartMap);
+		.previousMap = nextMap;
+		.map = Map.load(nextMap);
 		.player.transferCoins();
 		.player.reset();
 	}
