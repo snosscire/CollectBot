@@ -61,6 +61,7 @@ class Player {
 	boolean sliding;
 	boolean onGround;
 	boolean alive;
+	boolean pause;
 
 	number chestCoins;
 	number currentCoins;
@@ -106,18 +107,29 @@ class Player {
 		return map.hasCollisionWithGround(rect);
 	}
 
-	function die( boolean resetCoins ) {
+	function die( boolean resetCoins, object camera ) {
 		.alive = false;
 		.y = Config.PlayerSpawnY;
 		if( resetCoins ) {
 			Engine.playSound(ResourceManager.loadSound('Resources/Audio/fail_OG.ogg'));
 			.currentCoins = 0;
+		} else {
+			.pause = true;
 		}
 	}
 
-	function update( object map ) {
+	function update( object map, object camera ) {
 		object pos = new Vector(.x, .y);
 		boolean collision;
+
+		if( .pause ) {
+			.controller.update(self);
+			if( .slide or .jump ) {
+				.pause = false;
+			} else {
+				return;
+			}
+		}
 
 		if( .alive ) {
 			.controller.update(self);
@@ -173,7 +185,7 @@ class Player {
 				.onGround = true;
 				.wheelSprite.play = true;
 			} else {
-				.die(true);
+				.die(true, camera);
 			}
 		} else {
 			.x = pos.x;
@@ -186,7 +198,7 @@ class Player {
 			map.checkForCollisionWithObject(self);
 			if( .x > map.width or .y > map.height ) {
 				boolean resetCoins = (.x > map.width ? false : true);
-				.die(resetCoins);
+				.die(resetCoins, camera);
 			}
 		} else {
 			if( .x <= Config.PlayerSpawnX ) {
@@ -226,6 +238,15 @@ class Player {
 				);
 		}
 		.renderHUD(camera);
+		if( .pause ) {
+			Engine.renderText(
+					Application.HUDfont,
+					"Press [jump] or [slide] to run again.",
+					255, 255, 255,
+					(camera.screenWidth / 2) - 200 + camera.screenX,
+					(camera.screenHeight / 2) - 20 + camera.screenY
+				);
+		}
 	}
 
 	function renderHUD( object camera ) {
