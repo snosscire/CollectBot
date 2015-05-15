@@ -72,20 +72,29 @@ class Player {
 		player.coinTexture = ResourceManager.loadTexture('Resources/tiny_fox_coin.png');
 		player.runTexture = ResourceManager.loadTexture('Resources/' + Config.PlayerRunTexture);
 		player.slideTexture = ResourceManager.loadTexture('Resources/' + Config.PlayerSlideTexture);
-		player.texture = player.runTexture;
-		player.x = Config.PlayerSpawnX;
-		player.y = Config.PlayerSpawnY;
-		player.width = player.texture.width;
-		player.height = player.texture.height;
-		player.gravity = Config.PlayerGravity; // 0.5
-		player.speed = Config.PlayerMoveVelocity; // 3.5
-		player.alive = true;
 		player.wheelSprite = Sprite.load('PlayerWheel');
+		player.reset();
 		return player;
 	}
 
 	function constructor {
 		.velocity = new Vector();
+	}
+
+	function reset() {
+		.texture = .runTexture;
+		.x = Config.PlayerSpawnX;
+		.y = Config.PlayerSpawnY;
+		.width = .texture.width;
+		.height = .texture.height;
+		.gravity = Config.PlayerGravity; // 0.5
+		.speed = Config.PlayerMoveVelocity; // 3.5
+		.alive = true;
+	}
+
+	function transferCoins() {
+		.chestCoins += .currentCoins;
+		.currentCoins = 0;
 	}
 
 	function hasCollision( object map, object position ) {
@@ -223,23 +232,19 @@ class Player {
 		Engine.renderText(
 				Application.HUDfont,
 				"${.chestCoins}",
-				255,
-				255,
-				255,
+				255, 255, 255,
 				5 + .chestTexture.width + 5 + camera.screenX,
 				camera.screenHeight - 2 - .chestTexture.height + camera.screenY
 			);
 		Engine.renderTexture(
 				.coinTexture,
-				9 + camera.screenX,
+				10 + camera.screenX,
 				camera.screenHeight - 9 - .chestTexture.height - 5 - 30 + camera.screenY
 			);
 		Engine.renderText(
 				Application.HUDfont,
 				"${.currentCoins}",
-				255,
-				255,
-				255,
+				255, 255, 255,
 				5 + .chestTexture.width + 5 + camera.screenX,
 				camera.screenHeight - 2 - .chestTexture.height - 5 - 35 + camera.screenY
 			);

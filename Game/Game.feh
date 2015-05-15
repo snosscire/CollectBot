@@ -41,10 +41,10 @@ class GameClock {
 		if( .running ) {
 			.milliseconds -= Time.delta;
 			if( .milliseconds <= 0 ) {
+				.running = false;
 				.observers.each() using ( observer ) {
 					observer.onTimeIsUp();
 				};
-				.running = false;
 			}
 		}
 	}
@@ -88,6 +88,9 @@ class GameManager {
 	}
 
 	static function start( number games ) {
+		object manager = new GameManager();
+		GameClock.registerObserver(manager);
+
 		for( number i = 0; i < games; i++ ) {
 			object game = new Game();
 			object screenPosition = .dimensions["$games"][i];
@@ -108,6 +111,17 @@ class GameManager {
 			.games[i].render();
 		}
 	}
+
+	static function reset() {
+		.games.each() using ( game ) {
+			game.reset();
+		};
+		GameClock.start(Config.GameTime);
+	}
+
+	function onTimeIsUp() {
+		GameManager.reset();
+	}
 }
 
 class Game {
@@ -116,10 +130,15 @@ class Game {
 	object player;
 
 	function start( object screenPosition, object playerController ) {
-		GameClock.registerObserver(self);
 		.camera = new PlayerCamera(screenPosition.x, screenPosition.y, screenPosition.width, screenPosition.height);
 		.map = Map.load(Config.StartMap);
 		.player = Player.load(playerController);
+	}
+
+	function reset() {
+		.map = Map.load(Config.StartMap);
+		.player.transferCoins();
+		.player.reset();
 	}
 
 	function update() {
@@ -133,9 +152,5 @@ class Game {
 		.player.render(.map, .camera);	
 		.map.renderForeground(.camera);
 		Engine.setClipRectangle(0, 0, Config.ScreenWidth, Config.ScreenHeight);
-	}
-
-	function onTimeIsUp() {
-		Application.stop();
 	}
 }
