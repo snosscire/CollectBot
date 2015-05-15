@@ -6,6 +6,7 @@ uses 'Game/Controller';
 uses 'Game/Map';
 uses 'Game/Player';
 uses 'Game/Sprite';
+uses 'Game/Menu';
 
 class ResourceManager {
 	static array textures;
@@ -27,8 +28,10 @@ class Time {
 }
 
 class Application {
+	static object application;
 	static object HUDfont;
 	static boolean run;
+	static boolean inMainMenu;
 	static function stop() {
 		.run = false;
 	}
@@ -81,12 +84,18 @@ Config.load();
 
 Engine.createWindow(Config.WindowTitle, Config.ScreenWidth, Config.ScreenHeight);
 
+SplashScreen.milliseconds = Engine.currentTime() + (Config.SplashScreenTimeout * 1000);
+SplashScreen.texture = Engine.loadTexture(Config.SplashScreenTexture);
+SplashScreen.render();
+
 InputManager.register(application);
+Application.application = application;
 Application.HUDfont = Engine.loadFont('Resources/Fonts/Audiowide/Audiowide-Regular.ttf', 24);
 Application.run = true;
+Application.inMainMenu = true;
+
+MainMenu.initialize();
 GameManager.initialize();
-GameManager.start(1);
-GameClock.start(Config.GameTime);
 
 Time.last = Engine.currentTime();
 
@@ -95,14 +104,22 @@ while( Application.run ) {
 	Time.delta = Time.current - Time.last;
 	Time.last = Time.current;
 
-	Config.ShowFPS and FPS.update();
-	GameClock.update();
 	InputManager.update();
-	GameManager.update();
+
+	if( not Application.inMainMenu ) {
+		GameClock.update();
+		GameManager.update();
+	}
 
 	Engine.clearScreen();
-	GameManager.render();
-	GameClock.render();
-	Config.ShowFPS and FPS.render();
+
+	if( Application.inMainMenu ) {
+		MainMenu.render();
+	} else {
+		GameManager.render();
+		GameClock.render();
+		Config.ShowFPS and FPS.render();
+	}
+
 	Engine.updateScreen();
 }

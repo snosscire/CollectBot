@@ -17,6 +17,9 @@ class InputManager {
 			event = Engine.nextEvent();
 		}
 	}
+	static function clear() {
+		.devices = [];
+	}
 }
 
 abstract class InputDevice {

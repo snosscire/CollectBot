@@ -1,0 +1,78 @@
+class SplashScreen {
+	static boolean shouldRender;
+	static number milliseconds;
+	static object texture;
+	static function render() {
+		Engine.clearScreen();
+		Engine.renderTexture(
+				.texture,
+				(Config.ScreenWidth / 2) - (.texture.width / 2), 
+				(Config.ScreenHeight / 2) - (.texture.height / 2)
+			);
+		Engine.updateScreen();
+		while( Engine.currentTime() < .milliseconds);
+	}
+}
+
+class MainMenu {
+	static object menu;
+	static object backgroundTexture;
+	static object selectorTexture;
+	static number option = 0;
+
+	static function initialize() {
+		.menu = new MainMenu();
+		InputManager.register(.menu);
+		.backgroundTexture = Engine.loadTexture('Resources/UI/start_menu_BG.png');
+		.selectorTexture = Engine.loadTexture('Resources/UI/bot_selector.png');
+	}
+
+	static function render() {
+		Engine.renderTexture(
+				.backgroundTexture,
+				(Config.ScreenWidth / 2) - (.backgroundTexture.width / 2),
+				(Config.ScreenHeight / 2) - (.backgroundTexture.height / 2)
+			);
+		Engine.renderTexture(
+				.selectorTexture,
+				(Config.ScreenWidth / 2) - (.selectorTexture.width / 2) - 200, 
+				(Config.ScreenHeight / 2) - (.selectorTexture.height / 2) - 45 + (130 * .option)
+			);
+	}
+
+	static function invokeSelectedOption() {
+		if( .option == 2 ) {
+			Application.stop();
+		} else {
+			number players = .option + 1;
+			Application.inMainMenu = false;
+			InputManager.clear();
+			InputManager.register(Application.application);
+			GameManager.start(players);
+			GameClock.start(Config.GameTime);
+		}
+	}
+
+	function onEvent( object event ) {
+		if( event.type == Engine.EVENT_KEYDOWN ) {
+			if( event.key == Engine.KEY_DOWN ) {
+				MainMenu.option++;
+				if( MainMenu.option > 2 )
+					MainMenu.option = 0;
+				return false;
+			} else if( event.key == Engine.KEY_UP ) {
+				MainMenu.option--;
+				if( MainMenu.option < 0 )
+					MainMenu.option = 2;
+				return false;
+			} else if( event.key == Engine.KEY_RETURN ) {
+				MainMenu.invokeSelectedOption();
+				return false;
+			} else if( event.key == Engine.KEY_ESCAPE ) {
+				Application.stop();
+				return false;
+			}
+		}
+		return true;
+	}
+}

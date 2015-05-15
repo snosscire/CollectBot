@@ -107,6 +107,9 @@ Config.setValue('GameTime', 30);
 Config.setValue('GameClockFont', 'Resources/Fonts/Audiowide/Audiowide-Regular.ttf');
 Config.setValue('GameClockFontSize', 24);
 
+Config.setValue('SplashScreenTexture', 'Resources/UI/wedo_splash.jpg');
+Config.setValue('SplashScreenTimeout', 2);
+
 Config.setValue('PlayerSpawnX', 100);
 Config.setValue('PlayerSpawnY', 100);
 Config.setValue('PlayerGravity', 0.5);
