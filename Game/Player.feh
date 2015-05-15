@@ -147,7 +147,7 @@ class Player {
 				}
 			}
 
-			.velocity.y += .gravity;
+			.velocity.y += (Time.delta / 10.0) * .gravity;
 		} else {
 			if( .x > Config.PlayerSpawnX ) {
 				.velocity.x = Config.PlayerTeleportBackVelocity;
