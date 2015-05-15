@@ -1,0 +1,65 @@
+class SpriteFrame {
+	object texture;
+	number time;
+}
+
+class Sprite {
+	array frames;
+	number currentFrame;
+	number currentTime;
+	boolean play;
+	boolean center;
+
+	static function load( string name ) {
+		string basePath = 'Resources/Sprites/' + name;
+		array config = Engine.parseINI("${basePath}/Frames.ini");
+		if( config ) {
+			object sprite = new Sprite();
+			array sections = config.sectionNames();
+			sections.each() using ( section ) {
+				array frame = config.listBySection(section);
+				sprite.addFrame("${basePath}/" + frame.valueByName('Texture', ''), frame.valueByName('Time', 10));
+			};
+			sprite.center = true;
+			return sprite;
+		}
+		return null;
+	}
+
+	function addFrame( string file, number time ) {
+		object texture = Engine.loadTexture(file);
+		if( texture ) {
+			object frame = new SpriteFrame();
+			frame.texture = texture;
+			frame.time = time;
+			.frames[] = frame;
+		}
+	}
+
+	function nextFrame() {
+		.currentFrame++;
+		if( .currentFrame > .frames.size() - 1 )
+			.currentFrame = 0;
+	}
+
+	function render( number x, number y, object camera ) {
+		if( .frames ) {
+			object currentFrame = .frames[.currentFrame];
+			if( .play ) {
+				.currentTime += Time.delta;
+				if( .currentTime >= currentFrame.time ) {
+					.currentTime -= currentFrame.time;
+					.nextFrame();
+					currentFrame = .frames[.currentFrame];
+				}
+			}
+			if( x + currentFrame.texture.width >= 0 and y <= camera.screenWidth ) {
+				Engine.renderTexture(
+						currentFrame.texture,
+						x - (.center ? (currentFrame.texture.width / 2) : 0),
+						y - (.center ? (currentFrame.texture.height / 2) : 0)
+					);
+			}
+		}
+	}
+}

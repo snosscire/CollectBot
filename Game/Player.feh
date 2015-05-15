@@ -46,6 +46,7 @@ class Player {
 	object texture;
 	object runTexture;
 	object slideTexture;
+	object wheelSprite;
 
 	boolean moveLeft;
 	boolean moveRight;
@@ -70,7 +71,18 @@ class Player {
 		player.height = player.texture.height;
 		player.gravity = Config.PlayerGravity; // 0.5
 		player.speed = Config.PlayerMoveVelocity; // 3.5
-		//player.alive = true;
+		player.alive = true;
+		/*
+		player.wheelSprite = (closure {
+			object sprite = new Sprite();
+			sprite.play = true;
+			sprite.addFrame('Resources/oneBot_wheel01.png', 10);
+			sprite.addFrame('Resources/oneBot_wheel02.png', 10);
+			sprite.addFrame('Resources/oneBot_wheel03.png', 10);
+			return sprite;
+		}).invoke();
+		*/
+		player.wheelSprite = Sprite.load('PlayerWheel');
 		return player;
 	}
 
@@ -124,6 +136,7 @@ class Player {
 				if( .onGround and .jump ) {
 					.onGround = false;
 					.velocity.y = Config.PlayerJumpVelocity; // -10.0
+					.wheelSprite.play = false;
 				}
 			}
 
@@ -147,6 +160,7 @@ class Player {
 				.x = pos.x;
 				.velocity.y = 0.0;
 				.onGround = true;
+				.wheelSprite.play = true;
 			} else {
 				.die();
 			}
@@ -154,6 +168,7 @@ class Player {
 			.x = pos.x;
 			.y = pos.y;
 			.onGround = false;
+			.wheelSprite.play = false;
 		}
 
 		if( .alive ) {
@@ -190,6 +205,7 @@ class Player {
 			y -= .height / 2;
 
 			Engine.renderTexture(.texture, x, y);
+			.wheelSprite.render(x + (.width / 2) - 3, y + (.height / 2) + 21, camera);
 		}
 		Engine.renderText(Application.HUDfont, "${.currentCoins}", 255, 255, 255, 5, camera.screenHeight - 30);
 	}

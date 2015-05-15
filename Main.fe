@@ -5,6 +5,7 @@ uses 'Game/Game';
 uses 'Game/Controller';
 uses 'Game/Map';
 uses 'Game/Player';
+uses 'Game/Sprite';
 
 class Time {
 	static number current;

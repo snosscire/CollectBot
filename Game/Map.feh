@@ -1,72 +1,3 @@
-namespace modifies String {
-	function toBoolean( string value ) {
-		if( value.toLower() == 'yes' or
-			value.toLower() == 'true' or
-			value == '1' )
-		{
-			return true;
-		}
-		return false;
-	}
-}
-
-namespace modifies Array {
-	function sectionNames( array list ) {
-		array sections;
-		array have;
-		list.each() using ( o ) {
-			if( not have.keyExists(o.section) )
-				sections[] = o.section;
-		};
-		return sections;
-	}
-	function bySectionAndName( array list, string section, string name ) {
-		object match;
-		list.each() using ( entry ) {
-			if( entry.section == section and entry.name == name ) {
-				match = entry;
-				return false; // break
-			}
-		};
-		return match;
-	}
-	function valueBySectionAndName( array list, string section, string name, void defaultValue ) {
-		object match = list.bySectionAndName(section, name);
-		if( match ) {
-			if( defaultValue isa boolean ) return match.value.toBoolean();
-			if( defaultValue isa number )  return match.value.toNumber();
-			return match.value;
-		}
-		return defaultValue;
-	}
-	function byName( array list, string name ) {
-		object match;
-		list.each() using ( entry ) {
-			if( entry.name == name ) {
-				match = entry;
-				return false; // break
-			}
-		};
-		return match;
-	}
-	function valueByName( array list, string name, void defaultValue ) {
-		object match = list.byName(name);
-		if( match ) {
-			if( defaultValue isa boolean ) return match.value.toBoolean();
-			if( defaultValue isa number )  return match.value.toNumber();
-			return match.value;
-		}
-		return defaultValue;
-	}
-	function listBySection( array list, string section ) {
-		array matches;
-		list.each() using( entry ) {
-			if( entry.section == section )
-				matches[] = entry;
-		};
-		return matches;
-	}
-}
 
 class MapLayer {
 	number x;
@@ -94,7 +25,7 @@ class MapTile {
 
 	number x;
 	number y;
-	object texture;
+	object sprite;
 	string type;
 	boolean alive;
 
@@ -102,8 +33,7 @@ class MapTile {
 		if( .alive ) {
 			number screenX = .x - camera.left;
 			number screenY = .y - camera.top;
-			if( screenX + .texture.width >= 0 and screenX <= camera.screenWidth )
-				Engine.renderTexture(.texture, screenX, screenY);
+			.sprite.render(screenX, screenY, camera);
 		}
 	}
 
@@ -164,7 +94,7 @@ class Map {
 		if( image ) {
 			array config = Engine.parseINI(basePath + 'Tiles.ini');
 			array sections = config.sectionNames();
-			array textures;
+			array sprites;
 			array types;
 
 			sections.each() using ( section ) {
@@ -172,9 +102,21 @@ class Map {
 				number color = image.getColor(list.valueByName('Red', 0),
 					                          list.valueByName('Green', 0),
 					                          list.valueByName('Blue', 0));
-				object texture = Engine.loadTexture(basePath + 'Tiles/' + list.valueByName('Texture', ''));
-				if( texture ) {
-					textures["$color"] = texture;
+				string textureName = list.valueByName('Texture', '');
+				string spriteName = list.valueByName('Sprite', '');
+				object texture = (textureName ? Engine.loadTexture(basePath + 'Tiles/' + textureName) : null);
+				object sprite = (spriteName ? Sprite.load(spriteName) : null);
+				if( texture or sprite ) {
+					if( not sprite ) {
+						object frame = new SpriteFrame();
+						sprite = new Sprite();
+						frame.texture = texture;
+						frame.time = 1000;
+						sprite.frames[] = frame;
+					}
+					sprite.play = true;
+					sprite.center = false;
+					sprites["$color"] = sprite;
 					types["$color"] = list.valueByName('Type', 'ground').toLower();
 				}
 			};
@@ -182,11 +124,11 @@ class Map {
 			for( number y = 0; y < image.height; y++ ) {
 				for( number x = 0; x < image.width; x++ ) {
 					number color = image.getPixel(x, y);
-					if( textures.keyExists("$color") ) {
+					if( sprites.keyExists("$color") ) {
 						object tile = new MapTile();
 						tile.x = x * .tileWidth;
 						tile.y = y * .tileHeight;
-						tile.texture = textures["$color"];
+						tile.sprite = sprites["$color"];
 						tile.type = types["$color"];
 						tile.alive = true;
 

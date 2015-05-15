@@ -1,3 +1,73 @@
+namespace modifies String {
+	function toBoolean( string value ) {
+		if( value.toLower() == 'yes' or
+			value.toLower() == 'true' or
+			value == '1' )
+		{
+			return true;
+		}
+		return false;
+	}
+}
+
+namespace modifies Array {
+	function sectionNames( array list ) {
+		array sections;
+		array have;
+		list.each() using ( o ) {
+			if( not have.keyExists(o.section) )
+				sections[] = o.section;
+		};
+		return sections;
+	}
+	function bySectionAndName( array list, string section, string name ) {
+		object match;
+		list.each() using ( entry ) {
+			if( entry.section == section and entry.name == name ) {
+				match = entry;
+				return false; // break
+			}
+		};
+		return match;
+	}
+	function valueBySectionAndName( array list, string section, string name, void defaultValue ) {
+		object match = list.bySectionAndName(section, name);
+		if( match ) {
+			if( defaultValue isa boolean ) return match.value.toBoolean();
+			if( defaultValue isa number )  return match.value.toNumber();
+			return match.value;
+		}
+		return defaultValue;
+	}
+	function byName( array list, string name ) {
+		object match;
+		list.each() using ( entry ) {
+			if( entry.name == name ) {
+				match = entry;
+				return false; // break
+			}
+		};
+		return match;
+	}
+	function valueByName( array list, string name, void defaultValue ) {
+		object match = list.byName(name);
+		if( match ) {
+			if( defaultValue isa boolean ) return match.value.toBoolean();
+			if( defaultValue isa number )  return match.value.toNumber();
+			return match.value;
+		}
+		return defaultValue;
+	}
+	function listBySection( array list, string section ) {
+		array matches;
+		list.each() using( entry ) {
+			if( entry.section == section )
+				matches[] = entry;
+		};
+		return matches;
+	}
+}
+
 class Config {
 	static array values;
 	static function load() {
