@@ -12,6 +12,7 @@ LIBS=-L/cygdrive/c/Users/Tobias/Development/Environment/lib \
 	-lSDL2main \
 	-lSDL2 \
 	-lSDL2_image \
+	/cygdrive/c/Users/Tobias/Development/Environment/lib/libSDL2_mixer.dll.a \
 	/cygdrive/c/Users/Tobias/Development/Environment/lib/libSDL2_ttf.dll.a
 
 SOURCES=main.c \

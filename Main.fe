@@ -10,6 +10,7 @@ uses 'Game/Menu';
 
 class ResourceManager {
 	static array textures;
+	static array sounds;
 
 	static function loadTexture( string path ) {
 		object texture = (.textures.keyExists(path) ? .textures[path] : null);
@@ -18,6 +19,15 @@ class ResourceManager {
 			.textures[path] = texture;
 		}
 		return texture;
+	}
+
+	static function loadSound( string path ) {
+		object sound = (.sounds.keyExists(path) ? .sounds[path] : null);
+		if( not sound ) {
+			sound = Engine.loadSound(path);
+			.sounds[path] = sound;
+		}
+		return sound;
 	}
 }
 
@@ -97,6 +107,9 @@ Application.inMainMenu = true;
 MainMenu.initialize();
 GameManager.initialize();
 
+Engine.setSoundChannels(16);
+Engine.playMusic('Resources/Audio/menu_music_OG.ogg');
+
 Time.last = Engine.currentTime();
 
 while( Application.run ) {
@@ -124,3 +137,5 @@ while( Application.run ) {
 
 	Engine.updateScreen();
 }
+
+Engine.stopMusic();

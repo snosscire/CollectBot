@@ -131,6 +131,7 @@ class GameManager {
 		if( event.type == Engine.EVENT_KEYDOWN ) {
 			if( event.key == Engine.KEY_ESCAPE ) {
 				Application.inMainMenu = true;
+				Engine.playMusic('Resources/Audio/menu_music_OG.ogg');
 				InputManager.clear();
 				InputManager.register(Application.application);
 				InputManager.register(MainMenu.menu);

@@ -56,6 +56,8 @@ class MainMenu {
 			.startScreen.milliseconds = Engine.currentTime() + (Config.StartScreenTimeout * 1000);
 			.startScreen.render();
 
+			Engine.playMusic('Resources/Audio/inGame_music_OG.ogg');
+
 			Time.current = Engine.currentTime();
 			Time.delta = 0;
 			Time.last = Time.current;

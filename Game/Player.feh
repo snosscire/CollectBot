@@ -109,7 +109,10 @@ class Player {
 	function die( boolean resetCoins ) {
 		.alive = false;
 		.y = Config.PlayerSpawnY;
-		resetCoins and .currentCoins = 0;
+		if( resetCoins ) {
+			Engine.playSound(ResourceManager.loadSound('Resources/Audio/fail_OG.ogg'));
+			.currentCoins = 0;
+		}
 	}
 
 	function update( object map ) {
@@ -141,6 +144,7 @@ class Player {
 				}
 
 				if( .onGround and .jump ) {
+					Engine.playSound(ResourceManager.loadSound('Resources/Audio/jump_OG.ogg'));
 					.onGround = false;
 					.velocity.y = Config.PlayerJumpVelocity; // -10.0
 					.wheelSprite.play = false;
@@ -190,6 +194,7 @@ class Player {
 				.x = Config.PlayerSpawnX;
 				.y = Config.PlayerSpawnY;
 				map.resetObjects();
+				Engine.playSound(ResourceManager.loadSound('Resources/Audio/restart_OG.ogg'));
 			}
 		}
 	}
@@ -252,6 +257,7 @@ class Player {
 
 	function onObjectCollision( object o ) {
 		if( o.type == MapTile.TYPE_COIN ) {
+			Engine.playSound(ResourceManager.loadSound('Resources/Audio/Pickup_Coin_OG.ogg'));
 			.currentCoins++;
 			o.remove();
 		}

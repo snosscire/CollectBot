@@ -110,7 +110,7 @@ Config.setValue('GameClockFontSize', 24);
 Config.setValue('SplashScreenTexture', 'Resources/UI/wedo_splash.jpg');
 Config.setValue('SplashScreenTimeout', 2);
 Config.setValue('StartScreenTexture', 'Resources/UI/info.png');
-Config.setValue('StartScreenTimeout', 8);
+Config.setValue('StartScreenTimeout', 4);
 
 
 Config.setValue('PlayerSpawnX', 100);
